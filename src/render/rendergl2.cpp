@@ -541,7 +541,9 @@ void OpenGl2Renderer::DrawPixmap(std::shared_ptr<const Pixmap> pm,
 }
 
 void OpenGl2Renderer::UpdateProjection() {
-    glViewport(0, 0, camera.width, camera.height);
+    glViewport(0, 0,
+               camera.width  * camera.pixelRatio,
+               camera.height * camera.pixelRatio);
 
     double mat1[16];
     double mat2[16];

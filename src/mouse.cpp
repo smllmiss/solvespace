@@ -112,7 +112,7 @@ void GraphicsWindow::MouseMoved(double x, double y, bool leftDown,
                      pending.operation == Pending::DRAGGING_MARQUEE))
     {
         ClearPending();
-        InvalidateGraphics();
+        Invalidate();
     }
 
     Point2d mp = Point2d::From(x, y);
@@ -168,7 +168,7 @@ void GraphicsWindow::MouseMoved(double x, double y, bool leftDown,
                 SS.ScheduleShowTW();
             }
         }
-        InvalidateGraphics();
+        Invalidate();
         havePainted = false;
         return;
     }
@@ -282,7 +282,7 @@ void GraphicsWindow::MouseMoved(double x, double y, bool leftDown,
             Constraint *c = SK.constraint.FindById(pending.constraint);
             UpdateDraggedNum(&(c->disp.offset), x, y);
             orig.mouse = mp;
-            InvalidateGraphics();
+            Invalidate();
             return;
         }
 
@@ -298,7 +298,7 @@ void GraphicsWindow::MouseMoved(double x, double y, bool leftDown,
             HitTestMakeSelection(mp);
             SS.MarkGroupDirtyByEntity(pending.point);
             orig.mouse = mp;
-            InvalidateGraphics();
+            Invalidate();
             break;
 
         case Pending::DRAGGING_POINTS:
@@ -459,7 +459,7 @@ void GraphicsWindow::MouseMoved(double x, double y, bool leftDown,
 
         case Pending::DRAGGING_MARQUEE:
             orig.mouse = mp;
-            InvalidateGraphics();
+            Invalidate();
             return;
 
         case Pending::NONE:
@@ -468,11 +468,13 @@ void GraphicsWindow::MouseMoved(double x, double y, bool leftDown,
     }
 }
 
-void GraphicsWindow::ClearPending() {
+void GraphicsWindow::ClearPending(bool scheduleShowTW) {
     pending.points.Clear();
     pending.requests.Clear();
     pending = {};
-    SS.ScheduleShowTW();
+    if(scheduleShowTW) {
+        SS.ScheduleShowTW();
+    }
 }
 
 bool GraphicsWindow::IsFromPending(hRequest r) {
@@ -525,7 +527,7 @@ void GraphicsWindow::ContextMenuListStyles() {
 
 void GraphicsWindow::MouseRightUp(double x, double y) {
     SS.extraLine.draw = false;
-    InvalidateGraphics();
+    Invalidate();
 
     // Don't show a context menu if the user is right-clicking the toolbar,
     // or if they are finishing a pan.
@@ -949,6 +951,60 @@ bool GraphicsWindow::ConstrainPointByHovered(hEntity pt, const Point2d *projecte
     return false;
 }
 
+bool GraphicsWindow::MouseEvent(Platform::MouseEvent event) {
+    using Platform::MouseEvent;
+
+    double width, height;
+    window->GetSize(&width, &height);
+
+    event.x = event.x - width / 2;
+    event.y = height / 2 - event.y;
+
+    switch(event.type) {
+        case MouseEvent::Type::MOTION:
+            this->MouseMoved(event.x, event.y,
+                             event.button == MouseEvent::Button::LEFT,
+                             event.button == MouseEvent::Button::MIDDLE,
+                             event.button == MouseEvent::Button::RIGHT,
+                             event.shiftDown,
+                             event.controlDown);
+            break;
+
+        case MouseEvent::Type::PRESS:
+            if(event.button == MouseEvent::Button::LEFT) {
+                this->MouseLeftDown(event.x, event.y);
+            } else if(event.button == MouseEvent::Button::MIDDLE ||
+                      event.button == MouseEvent::Button::RIGHT) {
+                this->MouseMiddleOrRightDown(event.x, event.y);
+            }
+            break;
+
+        case MouseEvent::Type::DBL_PRESS:
+            if(event.button == MouseEvent::Button::LEFT) {
+                this->MouseLeftDoubleClick(event.x, event.y);
+            }
+            break;
+
+        case MouseEvent::Type::RELEASE:
+            if(event.button == MouseEvent::Button::LEFT) {
+                this->MouseLeftUp(event.x, event.y);
+            } else if(event.button == MouseEvent::Button::RIGHT) {
+                this->MouseRightUp(event.x, event.y);
+            }
+            break;
+
+        case MouseEvent::Type::SCROLL_VERT:
+            this->MouseScroll(event.x, event.y, event.scrollDelta);
+            break;
+
+        case MouseEvent::Type::LEAVE:
+            this->MouseLeave();
+            break;
+    }
+
+    return true;
+}
+
 void GraphicsWindow::MouseLeftDown(double mx, double my) {
     orig.mouseDown = true;
 
@@ -1317,7 +1373,7 @@ void GraphicsWindow::MouseLeftDown(double mx, double my) {
     }
 
     SS.ScheduleShowTW();
-    InvalidateGraphics();
+    Invalidate();
 }
 
 void GraphicsWindow::MouseLeftUp(double mx, double my) {
@@ -1332,13 +1388,13 @@ void GraphicsWindow::MouseLeftUp(double mx, double my) {
         case Pending::DRAGGING_NORMAL:
         case Pending::DRAGGING_RADIUS:
             ClearPending();
-            InvalidateGraphics();
+            Invalidate();
             break;
 
         case Pending::DRAGGING_MARQUEE:
             SelectByMarquee();
             ClearPending();
-            InvalidateGraphics();
+            Invalidate();
             break;
 
         case Pending::NONE:
@@ -1486,23 +1542,6 @@ void GraphicsWindow::EditControlDone(const char *s) {
     }
 }
 
-bool GraphicsWindow::KeyDown(int c) {
-    if(c == '\b') {
-        // Treat backspace identically to escape.
-        MenuEdit(Command::UNSELECT_ALL);
-        return true;
-    } else if(c == '=') {
-        // Treat = as +. This is specific to US (and US-compatible) keyboard layouts,
-        // but makes zooming from keyboard much more usable on these.
-        // Ideally we'd have a platform-independent way of binding to a particular
-        // physical key regardless of shift status...
-        MenuView(Command::ZOOM_IN);
-        return true;
-    }
-
-    return false;
-}
-
 void GraphicsWindow::MouseScroll(double x, double y, int delta) {
     double offsetRight = offset.Dot(projRight);
     double offsetUp = offset.Dot(projUp);
@@ -1528,7 +1567,7 @@ void GraphicsWindow::MouseScroll(double x, double y, int delta) {
         }
     }
     havePainted = false;
-    InvalidateGraphics();
+    Invalidate();
 }
 
 void GraphicsWindow::MouseLeave() {
@@ -1538,9 +1577,28 @@ void GraphicsWindow::MouseLeave() {
         hover.Clear();
         toolbarTooltipped = Command::NONE;
         toolbarHovered = Command::NONE;
-        PaintGraphics();
+        Invalidate();
     }
     SS.extraLine.draw = false;
+}
+
+bool GraphicsWindow::KeyboardEvent(Platform::KeyboardEvent event) {
+    using Platform::KeyboardEvent;
+
+    if(event.chr == '\b') {
+        // Treat backspace identically to escape.
+        MenuEdit(Command::UNSELECT_ALL);
+    } else if(event.chr == '=') {
+        // Treat = as +. This is specific to US (and US-compatible) keyboard layouts,
+        // but makes zooming from keyboard much more usable on these.
+        // Ideally we'd have a platform-independent way of binding to a particular
+        // physical key regardless of shift status...
+        MenuView(Command::ZOOM_IN);
+    } else {
+        return false;
+    }
+
+    return true;
 }
 
 void GraphicsWindow::SpaceNavigatorMoved(double tx, double ty, double tz,
@@ -1605,11 +1663,11 @@ void GraphicsWindow::SpaceNavigatorMoved(double tx, double ty, double tz,
     }
 
     havePainted = false;
-    InvalidateGraphics();
+    Invalidate();
 }
 
 void GraphicsWindow::SpaceNavigatorButtonUp() {
     ZoomToFit(/*includingInvisibles=*/false, /*useSelection=*/true);
-    InvalidateGraphics();
+    Invalidate();
 }
 

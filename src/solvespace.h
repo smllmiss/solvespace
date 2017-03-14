@@ -136,6 +136,7 @@ enum class ContextCommand : uint32_t;
 // From the platform-specific code.
 
 #include "platform/platform.h"
+#include "platform/gui.h"
 
 const size_t MAX_RECENT = 8;
 extern Platform::Path RecentFile[MAX_RECENT];
@@ -185,13 +186,7 @@ ContextCommand ShowContextMenu();
 
 void ShowTextWindow(bool visible);
 void InvalidateText();
-void InvalidateGraphics();
-void PaintGraphics();
-void ToggleFullScreen();
-bool FullScreenIsActive();
-void GetGraphicsWindowSize(int *w, int *h);
 void GetTextWindowSize(int *w, int *h);
-double GetScreenDpi();
 int64_t GetMilliseconds();
 
 void dbp(const char *str, ...);
@@ -199,13 +194,8 @@ void dbp(const char *str, ...);
     dbp("tri: (%.3f %.3f %.3f) (%.3f %.3f %.3f) (%.3f %.3f %.3f)", \
         CO((tri).a), CO((tri).b), CO((tri).c))
 
-void SetCurrentFilename(const Platform::Path &filename);
 void SetMousePointerToHand(bool yes);
 void DoMessageBox(const char *str, int rows, int cols, bool error);
-void SetTimerFor(int milliseconds);
-void SetAutosaveTimerFor(int minutes);
-void ScheduleLater();
-void ExitNow();
 
 void CnfFreezeInt(uint32_t val, const std::string &name);
 void CnfFreezeFloat(float val, const std::string &name);
@@ -851,14 +841,12 @@ public:
     // the sketch!
     bool allConsistent;
 
-    struct {
-        bool    scheduled;
-        bool    showTW;
-        bool    generateAll;
-    } later;
+    Platform::TimerRef timerShowTW;
+    Platform::TimerRef timerGenerateAll;
+    Platform::TimerRef timerAutosave;
     void ScheduleShowTW();
     void ScheduleGenerateAll();
-    void DoLater();
+    void ScheduleAutosave();
 
     static void MenuHelp(Command id);
 

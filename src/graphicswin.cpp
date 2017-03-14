@@ -203,10 +203,24 @@ std::string SolveSpace::MakeAcceleratorLabel(int accel) {
 }
 
 void GraphicsWindow::Init() {
-    canvas = CreateRenderer();
-    if(canvas) {
-        persistentCanvas = canvas->CreateBatch();
-        persistentDirty = true;
+    if(!window) {
+        window = Platform::CreateWindow();
+        if(window) {
+            using namespace std::placeholders;
+            window->onClose = std::bind(&SolveSpaceUI::Exit, &SS);
+            window->onRender = std::bind(&GraphicsWindow::Paint, this);
+            window->onMouseEvent = std::bind(&GraphicsWindow::MouseEvent, this, _1);
+            window->onKeyboardEvent = std::bind(&GraphicsWindow::KeyboardEvent, this, _1);
+            window->SetVisible(true);
+        }
+    }
+
+    if(!canvas) {
+        canvas = CreateRenderer();
+        if(canvas) {
+            persistentCanvas = canvas->CreateBatch();
+            persistentDirty = true;
+        }
     }
 
     scale = 5;
@@ -284,7 +298,7 @@ void GraphicsWindow::AnimateOnto(Quaternion quatf, Vector offsetf) {
 
         projRight = quat.RotationU();
         projUp    = quat.RotationV();
-        PaintGraphics();
+        window->Redraw();
 
         tn = GetMilliseconds();
         s = (tn - t0)/((double)dt);
@@ -293,7 +307,7 @@ void GraphicsWindow::AnimateOnto(Quaternion quatf, Vector offsetf) {
     projRight = quatf.RotationU();
     projUp = quatf.RotationV();
     offset = offsetf;
-    InvalidateGraphics();
+    Invalidate();
     // If the view screen is open, then we need to refresh it.
     SS.ScheduleShowTW();
 }
@@ -386,6 +400,11 @@ void GraphicsWindow::LoopOverPoints(const std::vector<Entity *> &entities,
     }
 }
 void GraphicsWindow::ZoomToFit(bool includingInvisibles, bool useSelection) {
+    ssassert(window != NULL, "Cannot zoom to fit without a window");
+
+    double width, height;
+    window->GetSize(&width, &height);
+
     std::vector<Entity *> entities;
     std::vector<Constraint *> constraints;
     std::vector<hEntity> faces;
@@ -490,7 +509,7 @@ void GraphicsWindow::MenuView(Command id) {
                 Message(_("No workplane is active, so the grid will not appear."));
             }
             SS.GW.EnsureValidActives();
-            InvalidateGraphics();
+            SS.GW.Invalidate();
             break;
 
         case Command::PERSPECTIVE_PROJ:
@@ -503,7 +522,7 @@ void GraphicsWindow::MenuView(Command id) {
                         "is typical."));
             }
             SS.GW.EnsureValidActives();
-            InvalidateGraphics();
+            SS.GW.Invalidate();
             break;
 
         case Command::ONTO_WORKPLANE:
@@ -585,7 +604,7 @@ void GraphicsWindow::MenuView(Command id) {
         case Command::SHOW_TOOLBAR:
             SS.showToolbar = !SS.showToolbar;
             SS.GW.EnsureValidActives();
-            InvalidateGraphics();
+            SS.GW.Invalidate();
             break;
 
         case Command::SHOW_TEXT_WND:
@@ -606,13 +625,13 @@ void GraphicsWindow::MenuView(Command id) {
             break;
 
         case Command::FULL_SCREEN:
-            ToggleFullScreen();
+            SS.GW.window->SetFullScreen(!SS.GW.window->IsFullScreen());
             SS.GW.EnsureValidActives();
             break;
 
         default: ssassert(false, "Unexpected menu ID");
     }
-    InvalidateGraphics();
+    SS.GW.Invalidate();
 }
 
 void GraphicsWindow::EnsureValidActives() {
@@ -685,7 +704,7 @@ void GraphicsWindow::EnsureValidActives() {
     CheckMenuByCmd(Command::SHOW_TOOLBAR, /*checked=*/SS.showToolbar);
     CheckMenuByCmd(Command::PERSPECTIVE_PROJ, /*checked=*/SS.usePerspectiveProj);
     CheckMenuByCmd(Command::SHOW_GRID,/*checked=*/SS.GW.showSnapGrid);
-    CheckMenuByCmd(Command::FULL_SCREEN, /*checked=*/FullScreenIsActive());
+    CheckMenuByCmd(Command::FULL_SCREEN, /*checked=*/SS.GW.window->IsFullScreen());
 
     if(change) SS.ScheduleShowTW();
 }
@@ -803,7 +822,7 @@ void GraphicsWindow::MenuEdit(Command id) {
 
                 SS.GW.MakeSelected(e->h);
             }
-            InvalidateGraphics();
+            SS.GW.Invalidate();
             SS.ScheduleShowTW();
             break;
         }
@@ -852,7 +871,7 @@ void GraphicsWindow::MenuEdit(Command id) {
             if(newlySelected == 0) {
                 Error(_("No additional entities share endpoints with the selected entities."));
             }
-            InvalidateGraphics();
+            SS.GW.Invalidate();
             SS.ScheduleShowTW();
             break;
         }
@@ -931,7 +950,7 @@ void GraphicsWindow::MenuEdit(Command id) {
             SS.GW.ClearPending();
 
             SS.GW.ClearSelection();
-            InvalidateGraphics();
+            SS.GW.Invalidate();
             break;
         }
 
@@ -988,7 +1007,7 @@ void GraphicsWindow::MenuRequest(Command id) {
             SS.GW.SetWorkplaneFreeIn3d();
             SS.GW.EnsureValidActives();
             SS.ScheduleShowTW();
-            InvalidateGraphics();
+            SS.GW.Invalidate();
             break;
 
         case Command::TANGENT_ARC:
@@ -1003,7 +1022,7 @@ void GraphicsWindow::MenuRequest(Command id) {
                 SS.TW.GoToScreen(TextWindow::Screen::TANGENT_ARC);
                 SS.GW.ForceTextWindowShown();
                 SS.ScheduleShowTW();
-                InvalidateGraphics(); // repaint toolbar
+                SS.GW.Invalidate(); // repaint toolbar
             }
             break;
 
@@ -1028,7 +1047,7 @@ c:
             SS.GW.pending.command = id;
             SS.GW.pending.description = s;
             SS.ScheduleShowTW();
-            InvalidateGraphics(); // repaint toolbar
+            SS.GW.Invalidate(); // repaint toolbar
             break;
 
         case Command::CONSTRUCTION: {
@@ -1080,8 +1099,7 @@ void GraphicsWindow::ToggleBool(bool *v) {
         SS.GenerateAll(SolveSpaceUI::Generate::UNTIL_ACTIVE);
     }
 
-    SS.GW.persistentDirty = true;
-    InvalidateGraphics();
+    Invalidate(/*clearPersistent=*/true);
     SS.ScheduleShowTW();
 }
 

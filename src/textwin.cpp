@@ -148,7 +148,7 @@ public:
         }
 
         SS.GenerateAll();
-        InvalidateGraphics();
+        SS.GW.Invalidate();
         SS.ScheduleShowTW();
     }
 };
@@ -459,7 +459,9 @@ done:
 }
 
 void TextWindow::Show() {
-    if(SS.GW.pending.operation == GraphicsWindow::Pending::NONE) SS.GW.ClearPending();
+    if(SS.GW.pending.operation == GraphicsWindow::Pending::NONE) {
+        SS.GW.ClearPending(/*scheduleShowTW=*/false);
+    }
 
     SS.GW.GroupSelection();
     auto const &gs = SS.GW.gs;
@@ -552,7 +554,7 @@ void TextWindow::DrawOrHitTestIcons(UiCanvas *uiCanvas, TextWindow::DrawOrHitHow
                 oldMousePos = Point2d::From(mx, my);
             }
             if(button != oldHovered || how == CLICK) {
-                SetTimerFor(1000);
+                //FIXME SetTimerFor(1000);
             }
             hoveredButton = button;
             if(how == CLICK) {
@@ -587,7 +589,7 @@ void TextWindow::DrawOrHitTestIcons(UiCanvas *uiCanvas, TextWindow::DrawOrHitHow
         } else {
             if(!hoveredButton || (hoveredButton != tooltippedButton)) {
                 tooltippedButton = NULL;
-                InvalidateGraphics();
+                SS.GW.Invalidate();
             }
             // And if we're hovered, then we've set a timer that will cause
             // us to show the tool tip later.
@@ -1049,7 +1051,7 @@ void TextWindow::MouseEvent(bool leftClick, bool leftDown, double x, double y) {
             if(item.link && item.f) {
                 (item.f)(item.link, item.data);
                 Show();
-                InvalidateGraphics();
+                SS.GW.Invalidate();
             }
         } else {
             if(item.link) {
@@ -1067,7 +1069,7 @@ void TextWindow::MouseEvent(bool leftClick, bool leftDown, double x, double y) {
         prevHoveredRow != hoveredRow ||
         prevHoveredCol != hoveredCol)
     {
-        InvalidateGraphics();
+        SS.GW.Invalidate();
         InvalidateText();
     }
 }

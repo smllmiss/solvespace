@@ -80,23 +80,22 @@ void TextWindow::ScreenChangeFixExportColors(int link, uint32_t v) {
 
 void TextWindow::ScreenChangeBackFaces(int link, uint32_t v) {
     SS.drawBackFaces = !SS.drawBackFaces;
-    SS.GW.persistentDirty = true;
-    InvalidateGraphics();
+    SS.GW.Invalidate(/*clearPersistent=*/true);
 }
 
 void TextWindow::ScreenChangeCheckClosedContour(int link, uint32_t v) {
     SS.checkClosedContour = !SS.checkClosedContour;
-    InvalidateGraphics();
+    SS.GW.Invalidate();
 }
 
 void TextWindow::ScreenChangeShadedTriangles(int link, uint32_t v) {
     SS.exportShadedTriangles = !SS.exportShadedTriangles;
-    InvalidateGraphics();
+    SS.GW.Invalidate();
 }
 
 void TextWindow::ScreenChangePwlCurves(int link, uint32_t v) {
     SS.exportPwlCurves = !SS.exportPwlCurves;
-    InvalidateGraphics();
+    SS.GW.Invalidate();
 }
 
 void TextWindow::ScreenChangeCanvasSizeAuto(int link, uint32_t v) {
@@ -105,7 +104,7 @@ void TextWindow::ScreenChangeCanvasSizeAuto(int link, uint32_t v) {
     } else {
         SS.exportCanvasSizeAuto = false;
     }
-    InvalidateGraphics();
+    SS.GW.Invalidate();
 }
 
 void TextWindow::ScreenChangeCanvasSize(int link, uint32_t v) {
@@ -317,7 +316,7 @@ bool TextWindow::EditControlDoneForConfiguration(const char *s) {
     switch(edit.meaning) {
         case Edit::LIGHT_INTENSITY:
             SS.lightIntensity[edit.i] = min(1.0, max(0.0, atof(s)));
-            InvalidateGraphics();
+            SS.GW.Invalidate();
             break;
 
         case Edit::LIGHT_DIRECTION: {
@@ -327,7 +326,7 @@ bool TextWindow::EditControlDoneForConfiguration(const char *s) {
             } else {
                 Error(_("Bad format: specify coordinates as x, y, z"));
             }
-            InvalidateGraphics();
+            SS.GW.Invalidate();
             break;
         }
         case Edit::COLOR: {
@@ -364,12 +363,12 @@ bool TextWindow::EditControlDoneForConfiguration(const char *s) {
                 Message(_("The perspective factor will have no effect until you "
                           "enable View -> Use Perspective Projection."));
             }
-            InvalidateGraphics();
+            SS.GW.Invalidate();
             break;
         }
         case Edit::GRID_SPACING: {
             SS.gridSpacing = (float)min(1e4, max(1e-3, SS.StringToMm(s)));
-            InvalidateGraphics();
+            SS.GW.Invalidate();
             break;
         }
         case Edit::DIGITS_AFTER_DECIMAL: {
@@ -379,7 +378,7 @@ bool TextWindow::EditControlDoneForConfiguration(const char *s) {
             } else {
                 SS.SetUnitDigitsAfterDecimal(v);
             }
-            InvalidateGraphics();
+            SS.GW.Invalidate();
             break;
         }
         case Edit::EXPORT_SCALE: {
@@ -451,7 +450,7 @@ bool TextWindow::EditControlDoneForConfiguration(const char *s) {
             if(sscanf(s, "%d", &interval)==1) {
                 if(interval >= 1) {
                     SS.autosaveInterval = interval;
-                    SetAutosaveTimerFor(interval);
+                    SS.ScheduleAutosave();
                 } else {
                     Error(_("Bad value: autosave interval should be positive"));
                 }

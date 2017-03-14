@@ -17,7 +17,9 @@ enum class StipplePattern : uint32_t;
 // an axonometric projection.
 class Camera {
 public:
-    size_t      width, height;
+    double      width;
+    double      height;
+    double      pixelRatio;
     Vector      offset;
     Vector      projRight;
     Vector      projUp;

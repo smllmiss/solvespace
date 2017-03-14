@@ -563,10 +563,10 @@ void TextWindow::ScreenStepDimGo(int link, uint32_t v) {
                 // Failed to solve, so quit
                 break;
             }
-            PaintGraphics();
+            SS.GW.window->Redraw();
         }
     }
-    InvalidateGraphics();
+    SS.GW.Invalidate();
     SS.TW.GoToScreen(Screen::LIST_OF_GROUPS);
 }
 void TextWindow::ShowStepDimension() {
@@ -787,7 +787,7 @@ void TextWindow::EditControlDone(const char *s) {
             break;
         }
     }
-    InvalidateGraphics();
+    SS.GW.Invalidate();
     SS.ScheduleShowTW();
 
     if(!edit.showAgain) {

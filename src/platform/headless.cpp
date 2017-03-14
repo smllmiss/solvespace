@@ -93,9 +93,9 @@ void ScheduleLater() {
 // Rendering
 //-----------------------------------------------------------------------------
 
-std::shared_ptr<ViewportCanvas> CreateRenderer() {
-    return NULL;
-}
+// std::shared_ptr<ViewportCanvas> CreateRenderer() {
+//     return NULL;
+// }
 
 //-----------------------------------------------------------------------------
 // Graphics window
@@ -114,38 +114,38 @@ void InvalidateGraphics() {
 std::shared_ptr<Pixmap> framebuffer;
 bool antialias = true;
 void PaintGraphics() {
-    const Camera &camera = SS.GW.GetCamera();
+    // const Camera &camera = SS.GW.GetCamera();
 
-    std::shared_ptr<Pixmap> pixmap = std::make_shared<Pixmap>();
-    pixmap->format = Pixmap::Format::BGRA;
-    pixmap->width  = camera.width;
-    pixmap->height = camera.height;
-    pixmap->stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, (int)camera.width);
-    pixmap->data   = std::vector<uint8_t>(pixmap->stride * pixmap->height);
-    cairo_surface_t *surface =
-        cairo_image_surface_create_for_data(&pixmap->data[0], CAIRO_FORMAT_RGB24,
-                                            (int)pixmap->width, (int)pixmap->height,
-                                            (int)pixmap->stride);
-    cairo_t *context = cairo_create(surface);
+    // std::shared_ptr<Pixmap> pixmap = std::make_shared<Pixmap>();
+    // pixmap->format = Pixmap::Format::BGRA;
+    // pixmap->width  = camera.width;
+    // pixmap->height = camera.height;
+    // pixmap->stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, (int)camera.width);
+    // pixmap->data   = std::vector<uint8_t>(pixmap->stride * pixmap->height);
+    // cairo_surface_t *surface =
+    //     cairo_image_surface_create_for_data(&pixmap->data[0], CAIRO_FORMAT_RGB24,
+    //                                         (int)pixmap->width, (int)pixmap->height,
+    //                                         (int)pixmap->stride);
+    // cairo_t *context = cairo_create(surface);
 
-    CairoRenderer canvas;
-    canvas.camera = camera;
-    canvas.lighting = SS.GW.GetLighting();
-    canvas.chordTolerance = SS.chordTol;
-    canvas.context = context;
-    canvas.antialias = antialias;
+    // CairoRenderer canvas;
+    // canvas.camera = camera;
+    // canvas.lighting = SS.GW.GetLighting();
+    // canvas.chordTolerance = SS.chordTol;
+    // canvas.context = context;
+    // canvas.antialias = antialias;
 
-    SS.GW.Draw(&canvas);
-    canvas.CullOccludedStrokes();
-    canvas.OutputInPaintOrder();
+    // SS.GW.Draw(&canvas);
+    // canvas.CullOccludedStrokes();
+    // canvas.OutputInPaintOrder();
 
-    pixmap->ConvertTo(Pixmap::Format::RGBA);
-    framebuffer = pixmap;
+    // pixmap->ConvertTo(Pixmap::Format::RGBA);
+    // framebuffer = pixmap;
 
-    canvas.Clear();
+    // canvas.Clear();
 
-    cairo_surface_destroy(surface);
-    cairo_destroy(context);
+    // cairo_surface_destroy(surface);
+    // cairo_destroy(context);
 }
 
 void SetCurrentFilename(const Platform::Path &filename) {
@@ -252,8 +252,8 @@ std::vector<Platform::Path> GetFontFiles() {
 void RefreshLocale() {
 }
 
-void ExitNow() {
-    ssassert(false, "Not implemented");
-}
+// void ExitNow() {
+//     ssassert(false, "Not implemented");
+// }
 
 }

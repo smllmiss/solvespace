@@ -113,8 +113,8 @@ elseif(APPLE)
         ${FREETYPE_LIBRARIES})
 else()
     set(platform_SOURCES
-        platform/gtkmain.cpp
-        render/rendergl.cpp
+        platform/guigtk.cpp
+        platform/headless.cpp #FIXME
         ${gl_SOURCES})
 
     set(platform_LIBRARIES

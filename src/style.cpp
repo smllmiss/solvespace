@@ -162,7 +162,7 @@ void Style::AssignSelectionToStyle(uint32_t v) {
     }
 
     SS.GW.ClearSelection();
-    InvalidateGraphics();
+    SS.GW.Invalidate();
 
     // And show that style's info screen in the text window.
     SS.TW.GoToScreen(TextWindow::Screen::STYLE_INFO);
@@ -439,7 +439,7 @@ void TextWindow::ScreenDeleteStyle(int link, uint32_t v) {
         // the style, so no need to do anything else.
     }
     SS.TW.GoToScreen(Screen::LIST_OF_STYLES);
-    InvalidateGraphics();
+    SS.GW.Invalidate();
 }
 
 void TextWindow::ScreenChangeStylePatternType(int link, uint32_t v) {
@@ -595,8 +595,7 @@ void TextWindow::ScreenChangeStyleYesNo(int link, uint32_t v) {
             s->textOrigin = (Style::TextOrigin)((uint32_t)s->textOrigin |  (uint32_t)Style::TextOrigin::TOP);
             break;
     }
-    SS.GW.persistentDirty = true;
-    InvalidateGraphics();
+    SS.GW.Invalidate(/*clearPersistent=*/true);
 }
 
 bool TextWindow::EditControlDoneForStyles(const char *str) {
