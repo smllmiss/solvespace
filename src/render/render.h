@@ -20,12 +20,12 @@ public:
     double      width;
     double      height;
     double      pixelRatio;
+    bool        gridFit;
     Vector      offset;
     Vector      projRight;
     Vector      projUp;
     double      scale;
     double      tangent;
-    bool        hasPixels;
 
     bool IsPerspective() const { return tangent != 0.0; }
 

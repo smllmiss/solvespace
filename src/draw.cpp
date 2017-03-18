@@ -306,12 +306,12 @@ Camera GraphicsWindow::GetCamera() const {
     Camera camera = {};
     window->GetSize(&camera.width, &camera.height);
     camera.pixelRatio = window->GetFractionalScaleFactor();
+    camera.gridFit  = (window->GetFractionalScaleFactor() == 1.0);
     camera.offset     = offset;
     camera.projUp     = projUp;
     camera.projRight  = projRight;
     camera.scale      = scale;
     camera.tangent    = SS.CameraTangent();
-    camera.hasPixels  = (window->GetFractionalScaleFactor() == 1.0);
     return camera;
 }
 

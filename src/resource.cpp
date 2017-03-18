@@ -938,8 +938,8 @@ void VectorFont::Trace(double forCapHeight, Vector o, Vector u, Vector v, const 
     ssassert(!IsEmpty(), "Expected a loaded font");
 
     // Perform grid-fitting only when the text is parallel to the view plane.
-    if(camera.hasPixels && !(u.WithMagnitude(1).Equals(camera.projRight) &&
-                             v.WithMagnitude(1).Equals(camera.projUp))) {
+    if(camera.gridFit && !(u.WithMagnitude(1).Equals(camera.projRight) &&
+                           v.WithMagnitude(1).Equals(camera.projUp))) {
         return Trace(forCapHeight, o, u, v, str, traceEdge);
     }
 
