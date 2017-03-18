@@ -85,10 +85,12 @@ public:
         RADIO_MARK,
     };
 
-    std::function<void()>   onActivate;
+    std::function<void()>   onTrigger;
 
+    virtual void SetAccelerator(KeyboardEvent accel) = 0;
     virtual void SetIndicator(Indicator indicator) = 0;
-    virtual void SetState(bool state) = 0;
+    virtual void SetEnabled(bool enabled) = 0;
+    virtual void SetActive(bool active) = 0;
 };
 
 typedef std::shared_ptr<MenuItem> MenuItemRef;
@@ -97,9 +99,8 @@ typedef std::shared_ptr<MenuItem> MenuItemRef;
 class Menu {
 public:
     virtual std::shared_ptr<MenuItem> AddItem(const std::string &label,
-                                              std::function<void()> onActivated = NULL,
-                                              KeyboardEvent accel = {}) = 0;
-    virtual std::shared_ptr<Menu> AddSubmenu(const std::string &label) = 0;
+                                              std::function<void()> onTrigger = NULL) = 0;
+    virtual std::shared_ptr<Menu> AddSubMenu(const std::string &label) = 0;
     virtual void AddSeparator() = 0;
 
     virtual bool PopUp() = 0;
@@ -108,6 +109,16 @@ public:
 };
 
 typedef std::shared_ptr<Menu> MenuRef;
+
+// A native menu bar.
+class MenuBar {
+public:
+    virtual std::shared_ptr<Menu> AddSubMenu(const std::string &label) = 0;
+
+    virtual void Clear() = 0;
+};
+
+typedef std::shared_ptr<MenuBar> MenuBarRef;
 
 // A native top-level window, with an OpenGL context, and an editor overlay.
 class Window {
@@ -132,6 +143,7 @@ public:
     virtual void SetFullScreen(bool fullScreen) = 0;
     virtual void SetTitle(const std::string &title) = 0;
     virtual bool SetTitleForFilename(const Path &filename) { return false; }
+    virtual void SetMenuBar(MenuBarRef menuBar) = 0;
     virtual void SetTooltip(const std::string &text) = 0;
 
     virtual void ShowEditor(double x, double y, double fontHeight, int widthInChars,
@@ -147,6 +159,7 @@ typedef std::unique_ptr<Window> WindowRef;
 // Factories.
 TimerRef CreateTimer();
 MenuRef CreateMenu();
+MenuBarRef CreateMenuBar();
 WindowRef CreateWindow();
 
 // Application-wide functionality.

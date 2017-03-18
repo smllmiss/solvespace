@@ -7,7 +7,9 @@
 #include <gtkmm/checkmenuitem.h>
 #include <gtkmm/separatormenuitem.h>
 #include <gtkmm/menu.h>
+#include <gtkmm/menubar.h>
 #include <gtkmm/glarea.h>
+#include <gtkmm/box.h>
 #include <gtkmm/window.h>
 #include <gtkmm/main.h>
 #include "solvespace.h"
@@ -20,11 +22,13 @@ namespace Platform {
 //-----------------------------------------------------------------------------
 
 class GtkMenuItem : public Gtk::CheckMenuItem {
-    Platform::MenuItem  *_receiver;
+    Platform::MenuItem *_receiver;
     bool                _has_indicator;
+    bool                _synthetic_event;
 
 public:
-    GtkMenuItem(Platform::MenuItem *receiver) : _receiver(receiver), _has_indicator(false) {
+    GtkMenuItem(Platform::MenuItem *receiver) :
+        _receiver(receiver), _has_indicator(false), _synthetic_event(false) {
     }
 
     void set_accel_key(const Gtk::AccelKey &accel_key) {
@@ -39,10 +43,21 @@ public:
         _has_indicator = has_indicator;
     }
 
+    void set_active(bool active) {
+        if(Gtk::CheckMenuItem::get_active() == active)
+            return;
+
+        _synthetic_event = true;
+        Gtk::CheckMenuItem::set_active(active);
+        _synthetic_event = false;
+    }
+
 protected:
     void on_activate() override {
-        if(_receiver->onActivate) {
-            _receiver->onActivate();
+        Gtk::CheckMenuItem::on_activate();
+
+        if(!_synthetic_event && _receiver->onTrigger) {
+            _receiver->onTrigger();
         }
     }
 
@@ -136,10 +151,10 @@ protected:
     bool on_scroll_event(GdkEventScroll *event) override {
         if(event->delta_y < 0 || event->direction == GDK_SCROLL_UP) {
             return process_pointer_event(MouseEvent::Type::SCROLL_VERT,
-                                         event->x, event->y, event->state, 0, -1);
+                                         event->x, event->y, event->state, 0, 1);
         } else if(event->delta_y > 0 || event->direction == GDK_SCROLL_DOWN) {
             return process_pointer_event(MouseEvent::Type::SCROLL_VERT,
-                                         event->x, event->y, event->state, 0, 1);
+                                         event->x, event->y, event->state, 0, -1);
         }
         return false;
     }
@@ -159,7 +174,7 @@ protected:
         } else if(gdk_event->keyval >= GDK_KEY_F1 &&
                   gdk_event->keyval <= GDK_KEY_F12) {
             event.key = KeyboardEvent::Key::FUNCTION;
-            event.num = gdk_event->keyval - GDK_KEY_F1;
+            event.num = gdk_event->keyval - GDK_KEY_F1 + 1;
         } else {
             return false;
         }
@@ -185,16 +200,35 @@ protected:
 
 class GtkWindow : public Gtk::Window {
     Platform::Window   *_receiver;
+    Gtk::VBox           _box;
+    Gtk::MenuBar       *_menu_bar;
     GtkGLWidget         _gl_widget;
     bool                _is_fullscreen;
 
 public:
-    GtkWindow(Platform::Window *receiver) : _receiver(receiver), _gl_widget(receiver) {
-        add(_gl_widget);
+    GtkWindow(Platform::Window *receiver) :
+            _receiver(receiver), _menu_bar(NULL), _gl_widget(receiver) {
+        add(_box);
+        _box.pack_end(_gl_widget, /*expand=*/true, /*fill=*/true);
     }
 
-    bool is_full_screen() {
+    bool is_full_screen() const {
         return _is_fullscreen;
+    }
+
+    Gtk::MenuBar *get_menu_bar() const {
+        return _menu_bar;
+    }
+
+    void set_menu_bar(Gtk::MenuBar *menu_bar) {
+        if(_menu_bar) {
+            _box.remove(*_menu_bar);
+        }
+        _menu_bar = menu_bar;
+        if(_menu_bar) {
+            _menu_bar->show_all();
+            _box.pack_start(*_menu_bar, /*expand=*/false, /*fill=*/false);
+        }
     }
 
     GtkGLWidget &get_gl_widget() {
@@ -245,11 +279,43 @@ TimerRef CreateTimer() {
     return std::unique_ptr<TimerImplGtk>(new TimerImplGtk);
 }
 
+static std::string PrepareMenuLabel(std::string label) {
+    std::replace(label.begin(), label.end(), '&', '_');
+    return label;
+}
+
 class MenuItemImplGtk : public MenuItem {
 public:
     GtkMenuItem gtkMenuItem;
 
     MenuItemImplGtk() : gtkMenuItem(this) {}
+
+    void SetAccelerator(KeyboardEvent accel) override {
+        guint accelKey;
+        if(accel.key == KeyboardEvent::Key::CHARACTER) {
+            if(accel.chr == '\t') {
+                accelKey = GDK_KEY_Tab;
+            } else if(accel.chr == '\e') {
+                accelKey = GDK_KEY_Escape;
+            } else if(accel.chr == '\x7f') {
+                accelKey = GDK_KEY_Delete;
+            } else {
+                accelKey = gdk_unicode_to_keyval(accel.chr);
+            }
+        } else if(accel.key == KeyboardEvent::Key::FUNCTION) {
+            accelKey = GDK_KEY_F1 + accel.num - 1;
+        }
+
+        Gdk::ModifierType accelMods = {};
+        if(accel.shiftDown) {
+            accelMods |= Gdk::SHIFT_MASK;
+        }
+        if(accel.controlDown) {
+            accelMods |= Gdk::CONTROL_MASK;
+        }
+
+        gtkMenuItem.set_accel_key(Gtk::AccelKey(accelKey, accelMods));
+    }
 
     void SetIndicator(Indicator state) override {
         switch(state) {
@@ -269,10 +335,14 @@ public:
         }
     }
 
-    void SetState(bool state) override {
+    void SetActive(bool active) override {
         ssassert(gtkMenuItem.has_indicator(),
                  "Cannot change state of a menu item without indicator");
-        gtkMenuItem.set_active(state);
+        gtkMenuItem.set_active(active);
+    }
+
+    void SetEnabled(bool enabled) override {
+        gtkMenuItem.set_sensitive(enabled);
     }
 };
 
@@ -280,58 +350,42 @@ class MenuImplGtk : public Menu {
 public:
     Gtk::Menu   gtkMenu;
     std::vector<std::shared_ptr<MenuItemImplGtk>>   menuItems;
+    std::vector<std::shared_ptr<MenuImplGtk>>       subMenus;
 
-    std::string PrepareLabel(std::string label) {
-        std::replace(label.begin(), label.end(), '&', '_');
-        return label;
-    }
-
-    MenuItemRef AddItem(const std::string &label, std::function<void()> onActivate = NULL,
-                        KeyboardEvent accel = {}) override {
-        guint accelKey;
-        if(accel.key == KeyboardEvent::Key::CHARACTER) {
-            accelKey = gdk_unicode_to_keyval(accel.chr);
-        } else if(accel.key == KeyboardEvent::Key::FUNCTION) {
-            accelKey = GDK_KEY_F1 + accel.num;
-        }
-
-        Gdk::ModifierType accelMods = {};
-        if(accel.shiftDown) {
-            accelMods |= Gdk::SHIFT_MASK;
-        }
-        if(accel.controlDown) {
-            accelMods |= Gdk::CONTROL_MASK;
-        }
-
+    MenuItemRef AddItem(const std::string &label,
+                        std::function<void()> onTrigger = NULL) override {
         auto menuItem = std::make_shared<MenuItemImplGtk>();
-        menuItem->gtkMenuItem.set_label(PrepareLabel(label));
-        menuItem->gtkMenuItem.set_use_underline(true);
-        menuItem->gtkMenuItem.set_accel_key(Gtk::AccelKey(accelKey, accelMods));
-        menuItem->onActivate = onActivate;
-
-        gtkMenu.append(menuItem->gtkMenuItem);
         menuItems.push_back(menuItem);
+
+        menuItem->gtkMenuItem.set_label(PrepareMenuLabel(label));
+        menuItem->gtkMenuItem.set_use_underline(true);
+        menuItem->gtkMenuItem.show();
+        menuItem->onTrigger = onTrigger;
+        gtkMenu.append(menuItem->gtkMenuItem);
 
         return menuItem;
     }
 
-    MenuRef AddSubmenu(const std::string &label) override {
+    MenuRef AddSubMenu(const std::string &label) override {
         auto menuItem = std::make_shared<MenuItemImplGtk>();
-        menuItem->gtkMenuItem.set_label(PrepareLabel(label));
-        menuItem->gtkMenuItem.set_use_underline(true);
-
-        auto submenu = std::make_shared<MenuImplGtk>();
-        menuItem->gtkMenuItem.set_submenu(submenu->gtkMenu);
-
-        gtkMenu.append(menuItem->gtkMenuItem);
         menuItems.push_back(menuItem);
 
-        return submenu;
+        auto subMenu = std::make_shared<MenuImplGtk>();
+        subMenus.push_back(subMenu);
+
+        menuItem->gtkMenuItem.set_label(PrepareMenuLabel(label));
+        menuItem->gtkMenuItem.set_use_underline(true);
+        menuItem->gtkMenuItem.set_submenu(subMenu->gtkMenu);
+        menuItem->gtkMenuItem.show_all();
+        gtkMenu.append(menuItem->gtkMenuItem);
+
+        return subMenu;
     }
 
     void AddSeparator() override {
-        Gtk::SeparatorMenuItem *menuItem = Gtk::manage(new Gtk::SeparatorMenuItem());
-        gtkMenu.append(*Gtk::manage(menuItem));
+        Gtk::SeparatorMenuItem *gtkMenuItem = Gtk::manage(new Gtk::SeparatorMenuItem());
+        gtkMenuItem->show();
+        gtkMenu.append(*Gtk::manage(gtkMenuItem));
     }
 
     bool PopUp() override {
@@ -350,10 +404,9 @@ public:
     }
 
     void Clear() override {
-        for(auto &menuItem : menuItems) {
-            gtkMenu.remove(((MenuItemImplGtk*)menuItem.get())->gtkMenuItem);
-        }
+        gtkMenu.foreach([&](Gtk::Widget &w) { gtkMenu.remove(w); });
         menuItems.clear();
+        subMenus.clear();
     }
 };
 
@@ -361,9 +414,39 @@ MenuRef CreateMenu() {
     return std::shared_ptr<MenuImplGtk>(new MenuImplGtk);
 }
 
+class MenuBarImplGtk : public MenuBar {
+public:
+    Gtk::MenuBar    gtkMenuBar;
+    std::vector<std::shared_ptr<MenuImplGtk>>       subMenus;
+
+    MenuRef AddSubMenu(const std::string &label) override {
+        auto subMenu = std::make_shared<MenuImplGtk>();
+        subMenus.push_back(subMenu);
+
+        Gtk::MenuItem *gtkMenuItem = Gtk::manage(new Gtk::MenuItem);
+        gtkMenuItem->set_label(PrepareMenuLabel(label));
+        gtkMenuItem->set_use_underline(true);
+        gtkMenuItem->set_submenu(subMenu->gtkMenu);
+        gtkMenuItem->show_all();
+        gtkMenuBar.append(*gtkMenuItem);
+
+        return subMenu;
+    }
+
+    void Clear() override {
+        gtkMenuBar.foreach([&](Gtk::Widget &w) { gtkMenuBar.remove(w); });
+        subMenus.clear();
+    }
+};
+
+MenuBarRef CreateMenuBar() {
+    return std::shared_ptr<MenuBar>(new MenuBarImplGtk);
+}
+
 class WindowImplGtk : public Window {
 public:
-    GtkWindow   gtkWindow;
+    GtkWindow       gtkWindow;
+    MenuBarRef      menuBar;
 
     WindowImplGtk() : gtkWindow(this) {}
 
@@ -424,6 +507,16 @@ public:
         }
     }
 
+    void SetMenuBar(MenuBarRef newMenuBar) override {
+        menuBar = newMenuBar;
+        if(menuBar) {
+            Gtk::MenuBar *gtkMenuBar = &((MenuBarImplGtk*)&*menuBar)->gtkMenuBar;
+            gtkWindow.set_menu_bar(gtkMenuBar);
+        } else {
+            gtkWindow.set_menu_bar(NULL);
+        }
+    }
+
     void ShowEditor(double x, double y, double fontHeight, int widthInChars,
                     bool isMonospace, const std::string &text) override {}
     void HideEditor() override {}
@@ -442,10 +535,6 @@ WindowRef CreateWindow() {
     return std::unique_ptr<WindowImplGtk>(new WindowImplGtk);
 }
 
-//-----------------------------------------------------------------------------
-// Implemenetation of application-wide functionality.
-//-----------------------------------------------------------------------------
-
 void Quit() {
     Gtk::Main::quit();
 }
@@ -458,9 +547,13 @@ void Quit() {
 //-----------------------------------------------------------------------------
 
 int main(int argc, char** argv) {
+    std::vector<std::string> args = InitPlatform(argc, argv);
     Gtk::Main main(argc, argv);
 
     SS.Init();
+    if(args.size() > 1) {
+        SS.Load(Platform::Path::From(args[1]).Expand(/*fromCurrentDirectory=*/true));
+    }
 
     main.run();
 

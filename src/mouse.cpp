@@ -550,7 +550,7 @@ void GraphicsWindow::MouseRightUp(double x, double y) {
     bool itemsSelected = (gs.n > 0 || gs.constraints > 0);
     if(itemsSelected) {
         if(gs.stylables > 0) {
-            Platform::MenuRef styleMenu = menu->AddSubmenu(_("Assign to Style"));
+            Platform::MenuRef styleMenu = menu->AddSubMenu(_("Assign to Style"));
 
             bool empty = true;
             for(const Style &s : SK.style) {

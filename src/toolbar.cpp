@@ -115,15 +115,12 @@ bool GraphicsWindow::ToolbarMouseMoved(int x, int y) {
                 tooltip = Translate(icon.tooltip);
             }
         }
-        for(int i = 0; SS.GW.menu[i].level >= 0; i++) {
-            if(toolbarHovered == SS.GW.menu[i].id) {
-                std::string accel = MakeAcceleratorLabel(SS.GW.menu[i].accel);
-                if(!accel.empty()) {
-                    tooltip += ssprintf(" (%s)", accel.c_str());
-                }
-                break;
-            }
+
+        std::string accel = SS.GW.AcceleratorForCommand(toolbarHovered);
+        if(!accel.empty()) {
+            tooltip += ssprintf(" (%s)", accel.c_str());
         }
+
         window->SetTooltip(tooltip);
     }
 
@@ -142,15 +139,7 @@ bool GraphicsWindow::ToolbarMouseDown(int x, int y) {
 
     Command hit;
     bool withinToolbar = ToolbarDrawOrHitTest(x, y, NULL, &hit);
-    // They might have clicked within the toolbar, but not on a button.
-    if(hit != Command::NONE) {
-        for(int i = 0; SS.GW.menu[i].level >= 0; i++) {
-            if(hit == SS.GW.menu[i].id) {
-                (SS.GW.menu[i].fn)((Command)SS.GW.menu[i].id);
-                break;
-            }
-        }
-    }
+    SS.GW.ActivateCommand(hit);
     return withinToolbar;
 }
 

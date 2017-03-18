@@ -137,10 +137,6 @@ enum class Command : uint32_t;
 #include "platform/platform.h"
 #include "platform/gui.h"
 
-const size_t MAX_RECENT = 8;
-extern Platform::Path RecentFile[MAX_RECENT];
-void RefreshRecentMenus();
-
 enum DialogChoice { DIALOG_YES = 1, DIALOG_NO = -1, DIALOG_CANCEL = 0 };
 DialogChoice SaveFileYesNoCancel();
 DialogChoice LoadAutosaveYesNo();
@@ -163,12 +159,6 @@ bool GetOpenFile(Platform::Path *filename, const std::string &defExtension,
 std::vector<Platform::Path> GetFontFiles();
 
 void OpenWebsite(const char *url);
-
-void RefreshLocale();
-
-void CheckMenuByCmd(Command id, bool checked);
-void RadioMenuByCmd(Command id, bool selected);
-void EnableMenuByCmd(Command id, bool enabled);
 
 void ShowGraphicsEditControl(int x, int y, int fontHeight, int minWidthChars,
                              const std::string &str);
@@ -278,7 +268,6 @@ void MakeMatrix(double *mat, double a11, double a12, double a13, double a14,
                              double a41, double a42, double a43, double a44);
 void MultMatrix(double *mata, double *matb, double *matr);
 
-std::string MakeAcceleratorLabel(int accel);
 void Message(const char *str, ...);
 void Error(const char *str, ...);
 void CnfFreezeBool(bool v, const std::string &name);
@@ -689,15 +678,13 @@ public:
 
     // The platform-dependent code calls this before entering the msg loop
     void Init();
-    bool Load(const Platform::Path &filename);
     void Exit();
 
     // File load/save routines, including the additional files that get
     // loaded when we have link groups.
     FILE        *fh;
     void AfterNewFile();
-    static void RemoveFromRecentList(const Platform::Path &filename);
-    static void AddToRecentList(const Platform::Path &filename);
+    void AddToRecentList(const Platform::Path &filename);
     Platform::Path saveFile;
     bool        fileLoadError;
     bool        unsaved;
@@ -721,10 +708,13 @@ public:
     static void MenuFile(Command id);
 	bool Autosave();
     void RemoveAutosave();
+    static const size_t MAX_RECENT = 8;
+    std::vector<Platform::Path> recentFiles;
+    bool Load(const Platform::Path &filename);
     bool GetFilenameAndSave(bool saveAs);
     bool OkayToStartNewFile();
     hGroup CreateDefaultDrawingGroup();
-    void UpdateWindowTitle();
+    void UpdateWindowTitles();
     void ClearExisting();
     void NewFile();
     bool SaveToFile(const Platform::Path &filename);

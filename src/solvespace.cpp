@@ -10,8 +10,6 @@
 SolveSpaceUI SolveSpace::SS = {};
 Sketch SolveSpace::SK = {};
 
-Platform::Path SolveSpace::RecentFile[MAX_RECENT] = {};
-
 void SolveSpaceUI::Init() {
 #if !defined(HEADLESS)
     // Check that the resource system works.
@@ -97,9 +95,10 @@ void SolveSpaceUI::Init() {
     showToolbar = CnfThawBool(true, "ShowToolbar");
     // Recent files menus
     for(size_t i = 0; i < MAX_RECENT; i++) {
-        RecentFile[i] = Platform::Path::From(CnfThawString("", "RecentFile_" + std::to_string(i)));
+        std::string rawPath = CnfThawString("", "RecentFile_" + std::to_string(i));
+        if(rawPath.empty()) continue;
+        recentFiles.push_back(Platform::Path::From(rawPath));
     }
-    RefreshRecentMenus();
     // Autosave timer
     autosaveInterval = CnfThawInt(5, "AutosaveInterval");
     // Locale
@@ -161,8 +160,13 @@ bool SolveSpaceUI::Load(const Platform::Path &filename) {
 
 void SolveSpaceUI::Exit() {
     // Recent files
-    for(size_t i = 0; i < MAX_RECENT; i++)
-        CnfFreezeString(RecentFile[i].raw, "RecentFile_" + std::to_string(i));
+    for(size_t i = 0; i < MAX_RECENT; i++) {
+        std::string rawPath;
+        if(recentFiles.size() > i) {
+            rawPath = recentFiles[i].raw;
+        }
+        CnfFreezeString(rawPath, "RecentFile_" + std::to_string(i));
+    }
     // Model colors
     for(size_t i = 0; i < MODEL_COLORS; i++)
         CnfFreezeColor(modelColor[i], "ModelColor_" + std::to_string(i));
@@ -246,7 +250,7 @@ void SolveSpaceUI::ScheduleShowTW() {
 }
 
 void SolveSpaceUI::ScheduleAutosave() {
-    timerAutosave->WindUp(autosaveInterval);
+    timerAutosave->WindUp(autosaveInterval * 60 * 1000);
 }
 
 double SolveSpaceUI::MmPerUnit() {
@@ -338,28 +342,22 @@ void SolveSpaceUI::AfterNewFile() {
     // but can't hurt to do it now.
     Style::CreateAllDefaultStyles();
 
-    UpdateWindowTitle();
+    UpdateWindowTitles();
 }
 
-void SolveSpaceUI::RemoveFromRecentList(const Platform::Path &filename) {
-    int dest = 0;
-    for(int src = 0; src < (int)MAX_RECENT; src++) {
-        if(!filename.Equals(RecentFile[src])) {
-            if(src != dest) RecentFile[dest] = RecentFile[src];
-            dest++;
-        }
-    }
-    while(dest < (int)MAX_RECENT) RecentFile[dest++].Clear();
-    RefreshRecentMenus();
-}
 void SolveSpaceUI::AddToRecentList(const Platform::Path &filename) {
-    RemoveFromRecentList(filename);
-
-    for(int src = MAX_RECENT - 2; src >= 0; src--) {
-        RecentFile[src+1] = RecentFile[src];
+    auto it = std::find_if(recentFiles.begin(), recentFiles.end(),
+                           [&](const Platform::Path &p) { return p.Equals(filename); });
+    if(it != recentFiles.end()) {
+        recentFiles.erase(it);
     }
-    RecentFile[0] = filename;
-    RefreshRecentMenus();
+
+    if(recentFiles.size() > MAX_RECENT) {
+        recentFiles.erase(recentFiles.begin() + MAX_RECENT);
+    }
+
+    recentFiles.insert(recentFiles.begin(), filename);
+    GW.PopulateRecentFiles();
 }
 
 bool SolveSpaceUI::GetFilenameAndSave(bool saveAs) {
@@ -413,7 +411,7 @@ bool SolveSpaceUI::OkayToStartNewFile() {
     ssassert(false, "Unexpected dialog choice");
 }
 
-void SolveSpaceUI::UpdateWindowTitle() {
+void SolveSpaceUI::UpdateWindowTitles() {
     if(saveFile.IsEmpty()) {
         GW.window->SetTitle(C_("title", "(new sketch)"));
     } else {
@@ -421,18 +419,11 @@ void SolveSpaceUI::UpdateWindowTitle() {
             GW.window->SetTitle(saveFile.raw);
         }
     }
+
+    //FIXME TW.window->SetTitle(C_("title", "Property Browser"));
 }
 
 void SolveSpaceUI::MenuFile(Command id) {
-    if((uint32_t)id >= (uint32_t)Command::RECENT_OPEN &&
-       (uint32_t)id < ((uint32_t)Command::RECENT_OPEN+MAX_RECENT)) {
-        if(!SS.OkayToStartNewFile()) return;
-
-        Platform::Path newFile = RecentFile[(uint32_t)id - (uint32_t)Command::RECENT_OPEN];
-        SS.Load(newFile);
-        return;
-    }
-
     switch(id) {
         case Command::NEW:
             if(!SS.OkayToStartNewFile()) break;
@@ -558,7 +549,7 @@ void SolveSpaceUI::MenuFile(Command id) {
         default: ssassert(false, "Unexpected menu ID");
     }
 
-    SS.UpdateWindowTitle();
+    SS.UpdateWindowTitles();
 }
 
 void SolveSpaceUI::MenuAnalyze(Command id) {
@@ -825,20 +816,6 @@ void SolveSpaceUI::ShowNakedEdges(bool reportOnlyWhenNotOkay) {
 }
 
 void SolveSpaceUI::MenuHelp(Command id) {
-    if((uint32_t)id >= (uint32_t)Command::LOCALE &&
-       (uint32_t)id < ((uint32_t)Command::LOCALE + Locales().size())) {
-        size_t offset = (uint32_t)id - (uint32_t)Command::LOCALE;
-        size_t i = 0;
-        for(auto locale : Locales()) {
-            if(i++ == offset) {
-                CnfFreezeString(locale.Culture(), "Locale");
-                SetLocale(locale.Culture());
-                break;
-            }
-        }
-        return;
-    }
-
     switch(id) {
         case Command::WEBSITE:
             OpenWebsite("http://solvespace.com/helpmenu");
