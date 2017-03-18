@@ -227,34 +227,6 @@ enum class Command : uint32_t {
     LOCALE = 0xf200,
 };
 
-enum class ContextCommand : uint32_t {
-    CANCELLED,
-    SUBMENU,
-    SEPARATOR,
-    UNSELECT_ALL,
-    UNSELECT_HOVERED,
-    CUT_SEL,
-    COPY_SEL,
-    PASTE,
-    PASTE_XFRM,
-    DELETE_SEL,
-    SELECT_CHAIN,
-    NEW_CUSTOM_STYLE,
-    NO_STYLE,
-    GROUP_INFO,
-    STYLE_INFO,
-    REFERENCE_DIM,
-    OTHER_ANGLE,
-    DEL_COINCIDENT,
-    SNAP_TO_GRID,
-    REMOVE_SPLINE_PT,
-    ADD_SPLINE_PT,
-    CONSTRUCTION,
-    ZOOM_TO_FIT,
-    SELECT_ALL,
-    FIRST_STYLE      = 0x40000000
-};
-
 class Button;
 
 class TextWindow {
@@ -829,7 +801,6 @@ public:
     void SelectByMarquee();
     void ClearSuper();
 
-    void ContextMenuListStyles();
     int64_t contextMenuCancelTime;
 
     // The toolbar, in toolbar.cpp

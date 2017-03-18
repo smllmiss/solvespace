@@ -164,15 +164,6 @@ void HideGraphicsEditControl() {
 bool GraphicsEditControlIsVisible() {
     return false;
 }
-void AddContextMenuItem(const char *label, ContextCommand cmd) {
-    ssassert(false, "Not implemented");
-}
-void CreateContextSubmenu() {
-    ssassert(false, "Not implemented");
-}
-ContextCommand ShowContextMenu() {
-    ssassert(false, "Not implemented");
-}
 void EnableMenuByCmd(Command cmd, bool enabled) {
 }
 void CheckMenuByCmd(Command cmd, bool checked) {

@@ -5,6 +5,7 @@
 //-----------------------------------------------------------------------------
 #include <glibmm/main.h>
 #include <gtkmm/checkmenuitem.h>
+#include <gtkmm/separatormenuitem.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/glarea.h>
 #include <gtkmm/window.h>
@@ -20,19 +21,34 @@ namespace Platform {
 
 class GtkMenuItem : public Gtk::CheckMenuItem {
     Platform::MenuItem  *_receiver;
+    bool                _has_indicator;
 
 public:
-    GtkMenuItem(Platform::MenuItem *receiver) : _receiver(receiver) {
+    GtkMenuItem(Platform::MenuItem *receiver) : _receiver(receiver), _has_indicator(false) {
     }
 
     void set_accel_key(const Gtk::AccelKey &accel_key) {
         Gtk::CheckMenuItem::set_accel_key(accel_key);
     }
 
+    bool has_indicator() const {
+        return _has_indicator;
+    }
+
+    void set_has_indicator(bool has_indicator) {
+        _has_indicator = has_indicator;
+    }
+
 protected:
     void on_activate() override {
         if(_receiver->onActivate) {
             _receiver->onActivate();
+        }
+    }
+
+    void draw_indicator_vfunc(const Cairo::RefPtr<Cairo::Context> &cr) override {
+        if(_has_indicator) {
+            Gtk::CheckMenuItem::draw_indicator_vfunc(cr);
         }
     }
 };
@@ -235,22 +251,28 @@ public:
 
     MenuItemImplGtk() : gtkMenuItem(this) {}
 
-    void SetState(State state) override {
+    void SetIndicator(Indicator state) override {
         switch(state) {
-            case State::UNMARKED:
-                gtkMenuItem.set_active(false);
+            case Indicator::NONE:
+                gtkMenuItem.set_has_indicator(false);
                 break;
 
-            case State::CHECK_MARK:
+            case Indicator::CHECK_MARK:
+                gtkMenuItem.set_has_indicator(true);
                 gtkMenuItem.set_draw_as_radio(false);
-                gtkMenuItem.set_active(true);
                 break;
 
-            case State::RADIO_MARK:
+            case Indicator::RADIO_MARK:
+                gtkMenuItem.set_has_indicator(true);
                 gtkMenuItem.set_draw_as_radio(true);
-                gtkMenuItem.set_active(true);
                 break;
         }
+    }
+
+    void SetState(bool state) override {
+        ssassert(gtkMenuItem.has_indicator(),
+                 "Cannot change state of a menu item without indicator");
+        gtkMenuItem.set_active(state);
     }
 };
 
@@ -287,7 +309,9 @@ public:
         menuItem->gtkMenuItem.set_accel_key(Gtk::AccelKey(accelKey, accelMods));
         menuItem->onActivate = onActivate;
 
+        gtkMenu.append(menuItem->gtkMenuItem);
         menuItems.push_back(menuItem);
+
         return menuItem;
     }
 
@@ -299,8 +323,30 @@ public:
         auto submenu = std::make_shared<MenuImplGtk>();
         menuItem->gtkMenuItem.set_submenu(submenu->gtkMenu);
 
+        gtkMenu.append(menuItem->gtkMenuItem);
         menuItems.push_back(menuItem);
+
         return submenu;
+    }
+
+    void AddSeparator() override {
+        Gtk::SeparatorMenuItem *menuItem = Gtk::manage(new Gtk::SeparatorMenuItem());
+        gtkMenu.append(*Gtk::manage(menuItem));
+    }
+
+    bool PopUp() override {
+        bool dismissed = true;
+        gtkMenu.signal_selection_done().connect([&]() { dismissed = false; });
+
+        Glib::RefPtr<Glib::MainLoop> loop = Glib::MainLoop::create();
+        gtkMenu.signal_deactivate().connect([&]() { loop->quit(); });
+
+        gtkMenu.show_all();
+        gtkMenu.popup(0, GDK_CURRENT_TIME);
+
+        loop->run();
+
+        return !dismissed;
     }
 
     void Clear() override {

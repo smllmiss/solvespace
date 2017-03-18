@@ -833,8 +833,8 @@ public:
     static void FreezeDefaultStyles();
     static void LoadFactoryDefaults();
 
-    static void AssignSelectionToStyle(uint32_t v);
-    static uint32_t CreateCustomStyle(bool rememberForUndo = true);
+    static void AssignSelectionToStyle(hStyle h = {});
+    static hStyle CreateCustomStyle(bool rememberForUndo = true);
 
     static RgbaColor RewriteColor(RgbaColor rgb);
 

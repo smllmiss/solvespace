@@ -79,15 +79,16 @@ typedef std::unique_ptr<Timer> TimerRef;
 // A native menu item.
 class MenuItem {
 public:
-    enum class State {
-        UNMARKED,
+    enum class Indicator {
+        NONE,
         CHECK_MARK,
         RADIO_MARK,
     };
 
     std::function<void()>   onActivate;
 
-    virtual void SetState(State state) = 0;
+    virtual void SetIndicator(Indicator indicator) = 0;
+    virtual void SetState(bool state) = 0;
 };
 
 typedef std::shared_ptr<MenuItem> MenuItemRef;
@@ -99,6 +100,9 @@ public:
                                               std::function<void()> onActivated = NULL,
                                               KeyboardEvent accel = {}) = 0;
     virtual std::shared_ptr<Menu> AddSubmenu(const std::string &label) = 0;
+    virtual void AddSeparator() = 0;
+
+    virtual bool PopUp() = 0;
 
     virtual void Clear() = 0;
 };

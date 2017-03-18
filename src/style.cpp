@@ -118,15 +118,15 @@ void Style::FreezeDefaultStyles() {
     }
 }
 
-uint32_t Style::CreateCustomStyle(bool rememberForUndo) {
+hStyle Style::CreateCustomStyle(bool rememberForUndo) {
     if(rememberForUndo) SS.UndoRemember();
     uint32_t vs = max((uint32_t)Style::FIRST_CUSTOM, SK.style.MaximumId() + 1);
     hStyle hs = { vs };
     (void)Style::Get(hs);
-    return hs.v;
+    return hs;
 }
 
-void Style::AssignSelectionToStyle(uint32_t v) {
+void Style::AssignSelectionToStyle(hStyle hs) {
     bool showError = false;
     SS.GW.GroupSelection();
 
@@ -144,7 +144,7 @@ void Style::AssignSelectionToStyle(uint32_t v) {
 
         hRequest hr = he.request();
         Request *r = SK.GetRequest(hr);
-        r->style.v = v;
+        r->style = hs;
         SS.MarkGroupDirty(r->group);
     }
     for(i = 0; i < SS.GW.gs.constraints; i++) {
@@ -152,7 +152,7 @@ void Style::AssignSelectionToStyle(uint32_t v) {
         Constraint *c = SK.GetConstraint(hc);
         if(!c->IsStylable()) continue;
 
-        c->disp.style.v = v;
+        c->disp.style = hs;
         SS.MarkGroupDirty(c->group);
     }
 
@@ -166,7 +166,7 @@ void Style::AssignSelectionToStyle(uint32_t v) {
 
     // And show that style's info screen in the text window.
     SS.TW.GoToScreen(TextWindow::Screen::STYLE_INFO);
-    SS.TW.shown.style.v = v;
+    SS.TW.shown.style = hs;
     SS.ScheduleShowTW();
 }
 
@@ -861,5 +861,6 @@ void TextWindow::ShowStyleInfo() {
 }
 
 void TextWindow::ScreenAssignSelectionToStyle(int link, uint32_t v) {
-    Style::AssignSelectionToStyle(v);
+    hStyle hs = { v };
+    Style::AssignSelectionToStyle(hs);
 }

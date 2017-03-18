@@ -130,7 +130,6 @@ class ExprVector;
 class ExprQuaternion;
 class RgbaColor;
 enum class Command : uint32_t;
-enum class ContextCommand : uint32_t;
 
 //================
 // From the platform-specific code.
@@ -179,10 +178,6 @@ void ShowTextEditControl(int x, int y, const std::string &str);
 void HideTextEditControl();
 bool TextEditControlIsVisible();
 void MoveTextScrollbarTo(int pos, int maxPos, int page);
-
-void AddContextMenuItem(const char *legend, ContextCommand id);
-void CreateContextSubmenu();
-ContextCommand ShowContextMenu();
 
 void ShowTextWindow(bool visible);
 void InvalidateText();
