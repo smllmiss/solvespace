@@ -8,8 +8,10 @@
 #include <gtkmm/separatormenuitem.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/menubar.h>
+#include <gtkmm/entry.h>
 #include <gtkmm/glarea.h>
 #include <gtkmm/box.h>
+#include <gtkmm/fixed.h>
 #include <gtkmm/window.h>
 #include <gtkmm/main.h>
 #include "solvespace.h"
@@ -198,18 +200,130 @@ protected:
     }
 };
 
+class GtkEditorOverlay : public Gtk::Fixed {
+    Platform::Window   *_receiver;
+    GtkGLWidget         _gl_widget;
+    Gtk::Entry          _entry;
+
+public:
+    GtkEditorOverlay(Platform::Window *receiver) : _receiver(receiver), _gl_widget(receiver) {
+        // set_size_request(0, 0);
+
+        add(_gl_widget);
+
+        _entry.set_no_show_all(true);
+        _entry.set_has_frame(false);
+        add(_entry);
+
+        _entry.signal_activate().
+            connect(sigc::mem_fun(this, &GtkEditorOverlay::on_activate));
+    }
+
+    bool is_editing() const {
+        return _entry.is_visible();
+    }
+
+    void start_editing(int x, int y, int font_height, bool is_monospace, int minWidthChars,
+                       const std::string &val) {
+        // x /= get_scale_factor();
+        // y /= get_scale_factor();
+        // font_height /= get_scale_factor();
+
+        Pango::FontDescription font_desc;
+        font_desc.set_family(is_monospace ? "monospace" : "normal");
+        font_desc.set_absolute_size(font_height * Pango::SCALE);
+        _entry.override_font(font_desc);
+
+        // y coordinate denotes baseline
+        Pango::FontMetrics font_metrics = get_pango_context()->get_metrics(font_desc);
+        y -= font_metrics.get_ascent() / Pango::SCALE;
+
+        Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create(get_pango_context());
+        layout->set_font_description(font_desc);
+        layout->set_text(val + " "); // avoid scrolling
+        int width = layout->get_logical_extents().get_width();
+
+        Gtk::Border margin  = _entry.get_style_context()->get_margin();
+        Gtk::Border border  = _entry.get_style_context()->get_border();
+        Gtk::Border padding = _entry.get_style_context()->get_padding();
+        move(_entry,
+             x - margin.get_left() - border.get_left() - padding.get_left(),
+             y - margin.get_top()  - border.get_top()  - padding.get_top());
+        _entry.set_width_chars(minWidthChars);
+        _entry.set_size_request(
+            width / Pango::SCALE + padding.get_left() + padding.get_right(),
+            -1);
+
+        _entry.set_text(val);
+        if(!_entry.is_visible()) {
+            _entry.show();
+            _entry.grab_focus();
+
+            // we grab the input for ourselves and not the entry to still have
+            // the pointer events go through to the underlay
+            add_modal_grab();
+        }
+    }
+
+    void stop_editing() {
+        if(_entry.is_visible()) {
+            remove_modal_grab();
+        }
+        _entry.hide();
+    }
+
+    GtkGLWidget &get_gl_widget() {
+        return _gl_widget;
+    }
+
+protected:
+    bool on_key_press_event(GdkEventKey *event) override {
+        if(is_editing()) {
+            if(event->keyval == GDK_KEY_Escape) {
+                stop_editing();
+            } else {
+                _entry.event((GdkEvent *)event);
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    bool on_key_release_event(GdkEventKey *event) override {
+        if(is_editing()) {
+            _entry.event((GdkEvent *)event);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    void on_size_allocate(Gtk::Allocation& allocation) override {
+        Gtk::Fixed::on_size_allocate(allocation);
+
+        _gl_widget.size_allocate(allocation);
+    }
+
+    void on_activate() {
+        if(_receiver->onEditingDone) {
+            _receiver->onEditingDone(_entry.get_text());
+        }
+    }
+};
+
 class GtkWindow : public Gtk::Window {
     Platform::Window   *_receiver;
     Gtk::VBox           _box;
     Gtk::MenuBar       *_menu_bar;
-    GtkGLWidget         _gl_widget;
+    GtkEditorOverlay    _editor_overlay;
     bool                _is_fullscreen;
 
 public:
     GtkWindow(Platform::Window *receiver) :
-            _receiver(receiver), _menu_bar(NULL), _gl_widget(receiver) {
+            _receiver(receiver), _menu_bar(NULL), _editor_overlay(receiver) {
         add(_box);
-        _box.pack_end(_gl_widget, /*expand=*/true, /*fill=*/true);
+        _box.pack_end(_editor_overlay, /*expand=*/true, /*fill=*/true);
     }
 
     bool is_full_screen() const {
@@ -231,8 +345,12 @@ public:
         }
     }
 
+    GtkEditorOverlay &get_editor_overlay() {
+        return _editor_overlay;
+    }
+
     GtkGLWidget &get_gl_widget() {
-        return _gl_widget;
+        return _editor_overlay.get_gl_widget();
     }
 
 protected:
@@ -463,8 +581,8 @@ public:
     }
 
     void GetSize(double *width, double *height) override {
-        *width  = gtkWindow.get_allocated_width();
-        *height = gtkWindow.get_allocated_height();
+        *width  = gtkWindow.get_gl_widget().get_allocated_width();
+        *height = gtkWindow.get_gl_widget().get_allocated_height();
     }
 
     int GetIntegralScaleFactor() override {
