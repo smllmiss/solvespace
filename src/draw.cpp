@@ -306,7 +306,7 @@ Camera GraphicsWindow::GetCamera() const {
     Camera camera = {};
     window->GetSize(&camera.width, &camera.height);
     camera.pixelRatio = window->GetFractionalScaleFactor();
-    camera.gridFit  = (window->GetFractionalScaleFactor() == 1.0);
+    camera.gridFit    = (window->GetFractionalScaleFactor() == 1.0);
     camera.offset     = offset;
     camera.projUp     = projUp;
     camera.projRight  = projRight;
