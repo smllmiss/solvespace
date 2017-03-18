@@ -311,7 +311,7 @@ Camera GraphicsWindow::GetCamera() const {
     camera.projRight  = projRight;
     camera.scale      = scale;
     camera.tangent    = SS.CameraTangent();
-    camera.hasPixels  = true;
+    camera.hasPixels  = (window->GetFractionalScaleFactor() == 1.0);
     return camera;
 }
 
