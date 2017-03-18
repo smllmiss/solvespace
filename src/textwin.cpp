@@ -1005,7 +1005,7 @@ void TextWindow::Paint() {
 }
 
 void TextWindow::MouseEvent(bool leftClick, bool leftDown, double x, double y) {
-    if(TextEditControlIsVisible() || GraphicsEditControlIsVisible()) {
+    if(TextEditControlIsVisible() || SS.GW.window->IsEditorVisible()) {
         if(DrawOrHitTestColorPicker(NULL, leftClick ? CLICK : HOVER, leftDown, x, y))
         {
             return;
@@ -1013,7 +1013,7 @@ void TextWindow::MouseEvent(bool leftClick, bool leftDown, double x, double y) {
 
         if(leftClick) {
             HideEditControl();
-            HideGraphicsEditControl();
+            SS.GW.window->HideEditor();
         } else {
             SetMousePointerToHand(false);
         }

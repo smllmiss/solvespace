@@ -84,7 +84,7 @@ void GraphicsWindow::StartDraggingBySelection() {
 void GraphicsWindow::MouseMoved(double x, double y, bool leftDown,
             bool middleDown, bool rightDown, bool shiftDown, bool ctrlDown)
 {
-    if(GraphicsEditControlIsVisible()) return;
+    if(window->IsEditorVisible()) return;
     if(context.active) return;
 
     SS.extraLine.draw = false;
@@ -497,7 +497,7 @@ void GraphicsWindow::ReplacePending(hRequest before, hRequest after) {
 }
 
 void GraphicsWindow::MouseMiddleOrRightDown(double x, double y) {
-    if(GraphicsEditControlIsVisible()) return;
+    if(window->IsEditorVisible()) return;
 
     orig.offset = offset;
     orig.projUp = projUp;
@@ -926,10 +926,10 @@ bool GraphicsWindow::MouseEvent(Platform::MouseEvent event) {
 void GraphicsWindow::MouseLeftDown(double mx, double my) {
     orig.mouseDown = true;
 
-    if(GraphicsEditControlIsVisible()) {
+    if(window->IsEditorVisible()) {
         orig.mouse = Point2d::From(mx, my);
         orig.mouseOnButtonDown = orig.mouse;
-        HideGraphicsEditControl();
+        window->HideEditor();
         return;
     }
     SS.TW.HideEditControl();
@@ -1335,7 +1335,7 @@ void GraphicsWindow::MouseLeftUp(double mx, double my) {
 }
 
 void GraphicsWindow::MouseLeftDoubleClick(double mx, double my) {
-    if(GraphicsEditControlIsVisible()) return;
+    if(window->IsEditorVisible()) return;
     SS.TW.HideEditControl();
 
     if(hover.constraint.v) {
@@ -1396,16 +1396,20 @@ void GraphicsWindow::MouseLeftDoubleClick(double mx, double my) {
                 break;
             }
         }
+
+        double width, height;
+        window->GetSize(&width, &height);
         hStyle hs = c->disp.style;
         if(hs.v == 0) hs.v = Style::CONSTRAINT;
-        ShowGraphicsEditControl((int)p2.x, (int)p2.y,
-                                (int)(VectorFont::Builtin()->GetHeight(Style::TextHeight(hs))),
-                                editMinWidthChar, editValue);
+        double fontHeight = VectorFont::Builtin()->GetHeight(Style::TextHeight(hs));
+        window->ShowEditor(p2.x + width/2, height/2 - p2.y,
+                           fontHeight, editMinWidthChar,
+                           /*isMonospace=*/false, editValue);
     }
 }
 
-void GraphicsWindow::EditControlDone(const char *s) {
-    HideGraphicsEditControl();
+void GraphicsWindow::EditControlDone(const std::string &s) {
+    window->HideEditor();
     Constraint *c = SK.GetConstraint(constraintBeingEdited);
 
     if(c->type == Constraint::Type::COMMENT) {
@@ -1414,7 +1418,7 @@ void GraphicsWindow::EditControlDone(const char *s) {
         return;
     }
 
-    Expr *e = Expr::From(s, true);
+    Expr *e = Expr::From(s.c_str(), true);
     if(e) {
         SS.UndoRemember();
 

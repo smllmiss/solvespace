@@ -58,12 +58,12 @@ const MenuEntry Menu[] = {
 #endif
 
 { 0, N_("&Edit"),                       Command::NONE,             0,       KN, NULL   },
-{ 1, N_("&Undo"),                       Command::UNDO,             C|'z',   KN, mView  },
-{ 1, N_("&Redo"),                       Command::REDO,             C|'y',   KN, mView  },
-{ 1, N_("Re&generate All"),             Command::REGEN_ALL,        ' ',     KN, mView  },
+{ 1, N_("&Undo"),                       Command::UNDO,             C|'z',   KN, mEdit  },
+{ 1, N_("&Redo"),                       Command::REDO,             C|'y',   KN, mEdit  },
+{ 1, N_("Re&generate All"),             Command::REGEN_ALL,        ' ',     KN, mEdit  },
 { 1,  NULL,                             Command::NONE,             0,       KN, NULL   },
-{ 1, N_("Snap Selection to &Grid"),     Command::SNAP_TO_GRID,     '.',     KN, mView  },
-{ 1, N_("Rotate Imported &90°"),        Command::ROTATE_90,        '9',     KN, mView  },
+{ 1, N_("Snap Selection to &Grid"),     Command::SNAP_TO_GRID,     '.',     KN, mEdit  },
+{ 1, N_("Rotate Imported &90°"),        Command::ROTATE_90,        '9',     KN, mEdit  },
 { 1,  NULL,                             Command::NONE,             0,       KN, NULL   },
 { 1, N_("Cu&t"),                        Command::CUT,              C|'x',   KN, mClip  },
 { 1, N_("&Copy"),                       Command::COPY,             C|'c',   KN, mClip  },
@@ -348,6 +348,7 @@ void GraphicsWindow::Init() {
             window->onRender = std::bind(&GraphicsWindow::Paint, this);
             window->onMouseEvent = std::bind(&GraphicsWindow::MouseEvent, this, _1);
             window->onKeyboardEvent = std::bind(&GraphicsWindow::KeyboardEvent, this, _1);
+            window->onEditingDone = std::bind(&GraphicsWindow::EditControlDone, this, _1);
             PopulateMainMenu();
             window->SetVisible(true);
         }
@@ -883,7 +884,7 @@ void GraphicsWindow::DeleteTaggedRequests() {
 
     // An edit might be in progress for the just-deleted item. So
     // now it's not.
-    HideGraphicsEditControl();
+    window->HideEditor();
     SS.TW.HideEditControl();
     // And clear out the selection, which could contain that item.
     ClearSuper();
@@ -924,7 +925,7 @@ void GraphicsWindow::MenuEdit(Command id) {
                SS.GW.pending.operation  == Pending::NONE)
             {
                 if(!(TextEditControlIsVisible() ||
-                     GraphicsEditControlIsVisible()))
+                     SS.GW.window->IsEditorVisible()))
                 {
                     if(SS.TW.shown.screen == TextWindow::Screen::STYLE_INFO) {
                         SS.TW.GoToScreen(TextWindow::Screen::LIST_OF_STYLES);
@@ -1216,7 +1217,7 @@ c:
 }
 
 void GraphicsWindow::ClearSuper() {
-    HideGraphicsEditControl();
+    window->HideEditor();
     ClearPending();
     ClearSelection();
     hover.Clear();

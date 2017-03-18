@@ -851,7 +851,7 @@ public:
     void MouseScroll(double x, double y, int delta);
     void MouseLeave();
     bool KeyboardEvent(Platform::KeyboardEvent event);
-    void EditControlDone(const char *s);
+    void EditControlDone(const std::string &s);
 
     int64_t lastSpaceNavigatorTime;
     hGroup lastSpaceNavigatorGroup;

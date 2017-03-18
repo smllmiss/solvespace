@@ -160,10 +160,6 @@ std::vector<Platform::Path> GetFontFiles();
 
 void OpenWebsite(const char *url);
 
-void ShowGraphicsEditControl(int x, int y, int fontHeight, int minWidthChars,
-                             const std::string &str);
-void HideGraphicsEditControl();
-bool GraphicsEditControlIsVisible();
 void ShowTextEditControl(int x, int y, const std::string &str);
 void HideTextEditControl();
 bool TextEditControlIsVisible();

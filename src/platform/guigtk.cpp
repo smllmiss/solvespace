@@ -207,8 +207,6 @@ class GtkEditorOverlay : public Gtk::Fixed {
 
 public:
     GtkEditorOverlay(Platform::Window *receiver) : _receiver(receiver), _gl_widget(receiver) {
-        // set_size_request(0, 0);
-
         add(_gl_widget);
 
         _entry.set_no_show_all(true);
@@ -225,10 +223,6 @@ public:
 
     void start_editing(int x, int y, int font_height, bool is_monospace, int minWidthChars,
                        const std::string &val) {
-        // x /= get_scale_factor();
-        // y /= get_scale_factor();
-        // font_height /= get_scale_factor();
-
         Pango::FontDescription font_desc;
         font_desc.set_family(is_monospace ? "monospace" : "normal");
         font_desc.set_absolute_size(font_height * Pango::SCALE);
@@ -577,7 +571,7 @@ public:
     }
 
     bool IsEditorVisible() override {
-        return false;
+        return gtkWindow.get_editor_overlay().is_editing();
     }
 
     void GetSize(double *width, double *height) override {
@@ -636,8 +630,14 @@ public:
     }
 
     void ShowEditor(double x, double y, double fontHeight, int widthInChars,
-                    bool isMonospace, const std::string &text) override {}
-    void HideEditor() override {}
+                    bool isMonospace, const std::string &text) override {
+        gtkWindow.get_editor_overlay().start_editing(x, y, fontHeight, widthInChars,
+                                                     isMonospace, text);
+    }
+
+    void HideEditor() override {
+        gtkWindow.get_editor_overlay().stop_editing();
+    }
 
     void Invalidate() override {
         gtkWindow.get_gl_widget().queue_render();
