@@ -420,7 +420,7 @@ void SolveSpaceUI::UpdateWindowTitles() {
         }
     }
 
-    //FIXME TW.window->SetTitle(C_("title", "Property Browser"));
+    TW.window->SetTitle(C_("title", "Property Browser"));
 }
 
 void SolveSpaceUI::MenuFile(Command id) {

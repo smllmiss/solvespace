@@ -1507,9 +1507,14 @@ void GraphicsWindow::MouseLeave() {
 bool GraphicsWindow::KeyboardEvent(Platform::KeyboardEvent event) {
     using Platform::KeyboardEvent;
 
+    if(event.type == KeyboardEvent::Type::RELEASE) return true;
+
     if(event.chr == '\b') {
         // Treat backspace identically to escape.
         MenuEdit(Command::UNSELECT_ALL);
+    } else if(event.chr == '\t') {
+        // On some platforms (GTK), Tab cannot be an accelerator, so emulate it here.
+        MenuView(Command::SHOW_TEXT_WND);
     } else if(event.chr == '=') {
         // Treat = as +. This is specific to US (and US-compatible) keyboard layouts,
         // but makes zooming from keyboard much more usable on these.

@@ -387,7 +387,6 @@ void GraphicsWindow::Init() {
     drawOccludedAs = DrawOccludedAs::INVISIBLE;
 
     showTextWindow = true;
-    ShowTextWindow(showTextWindow);
 
     showSnapGrid = false;
     context.active = false;
@@ -837,7 +836,7 @@ void GraphicsWindow::EnsureValidActives() {
     unitsMmMenuItem->SetActive(SS.viewUnits == Unit::MM);
     unitsInchesMenuItem->SetActive(SS.viewUnits == Unit::INCHES);
 
-    ShowTextWindow(SS.GW.showTextWindow);
+    SS.TW.window->SetVisible(SS.GW.showTextWindow);
     showTextWndMenuItem->SetActive(SS.GW.showTextWindow);
 
     showGridMenuItem->SetActive(SS.GW.showSnapGrid);
@@ -867,7 +866,7 @@ void GraphicsWindow::ForceTextWindowShown() {
     if(!showTextWindow) {
         showTextWindow = true;
         showTextWndMenuItem->SetActive(true);
-        ShowTextWindow(true);
+        SS.TW.window->SetVisible(true);
     }
 }
 

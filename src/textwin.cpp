@@ -223,7 +223,18 @@ void TextWindow::MakeColorTable(const Color *in, float *out) {
 }
 
 void TextWindow::Init() {
-    canvas = CreateRenderer();
+    if(!window) {
+        window = Platform::CreateWindow();
+        if(window) {
+            window->onRender = std::bind(&TextWindow::Paint, this);
+            window->SetKind(Platform::Window::Kind::TOOL);
+            window->SetVisible(true);
+        }
+    }
+
+    if(!canvas) {
+        canvas = CreateRenderer();
+    }
 
     ClearSuper();
 }
@@ -232,6 +243,7 @@ void TextWindow::ClearSuper() {
     HideEditControl();
 
     // Ugly hack, but not so ugly as the next line
+    Platform::WindowRef oldWindow = std::move(window);
     std::shared_ptr<ViewportCanvas> oldCanvas = canvas;
 
     // Cannot use *this = {} here because TextWindow instances
@@ -240,6 +252,7 @@ void TextWindow::ClearSuper() {
     memset(this, 0, sizeof(*this));
 
     // Return old canvas
+    window = std::move(oldWindow);
     canvas = oldCanvas;
 
     MakeColorTable(fgColors, fgColorTable);
@@ -514,20 +527,20 @@ void TextWindow::Show() {
         }
     }
 
-    InvalidateText();
+    window->Invalidate();
 }
 
 void TextWindow::TimerCallback()
 {
     tooltippedButton = hoveredButton;
-    InvalidateText();
+    window->Invalidate();
 }
 
 void TextWindow::DrawOrHitTestIcons(UiCanvas *uiCanvas, TextWindow::DrawOrHitHow how,
                                     double mx, double my)
 {
-    int width, height;
-    GetTextWindowSize(&width, &height);
+    double width, height;
+    window->GetSize(&width, &height);
 
     int x = 20, y = 33 + LINE_HEIGHT;
     y -= scrollPos*(LINE_HEIGHT/2);
@@ -566,7 +579,7 @@ void TextWindow::DrawOrHitTestIcons(UiCanvas *uiCanvas, TextWindow::DrawOrHitHow
     }
 
     if(how != PAINT && hoveredButton != oldHovered) {
-        InvalidateText();
+        window->Invalidate();
     }
 
     if(tooltippedButton && !tooltippedButton->Tooltip().empty()) {
@@ -577,7 +590,7 @@ void TextWindow::DrawOrHitTestIcons(UiCanvas *uiCanvas, TextWindow::DrawOrHitHow
             ox += 3;
             oy -= 3;
             int tw = (tooltip.length() + 1) * (CHAR_WIDTH - 1);
-            ox = min(ox, (width - 25) - tw);
+            ox = min(ox, ((int)width - 25) - tw);
             oy = max(oy, 5);
 
             uiCanvas->DrawRect(ox, ox+tw, oy, oy+LINE_HEIGHT,
@@ -677,7 +690,7 @@ bool TextWindow::DrawOrHitTestColorPicker(UiCanvas *uiCanvas, DrawOrHitHow how, 
     }
 
     if(!editControl.colorPicker.show) return false;
-    if(how == CLICK || (how == HOVER && leftDown)) InvalidateText();
+    if(how == CLICK || (how == HOVER && leftDown)) window->Invalidate();
 
     static const RgbaColor BaseColor[12] = {
         RGBi(255,   0,   0),
@@ -696,8 +709,8 @@ bool TextWindow::DrawOrHitTestColorPicker(UiCanvas *uiCanvas, DrawOrHitHow how, 
         RGBi(  0, 127, 255),
     };
 
-    int width, height;
-    GetTextWindowSize(&width, &height);
+    double width, height;
+    window->GetSize(&width, &height);
 
     int px = LEFT_MARGIN + CHAR_WIDTH*editControl.col;
     int py = (editControl.halfRow - SS.TW.scrollPos)*(LINE_HEIGHT/2);
@@ -707,7 +720,7 @@ bool TextWindow::DrawOrHitTestColorPicker(UiCanvas *uiCanvas, DrawOrHitHow how, 
     static const int WIDTH = 16, HEIGHT = 12;
     static const int PITCH = 18, SIZE = 15;
 
-    px = min(px, width - (WIDTH*PITCH + 40));
+    px = min(px, (int)width - (WIDTH*PITCH + 40));
 
     int pxm = px + WIDTH*PITCH + 11,
         pym = py + HEIGHT*PITCH + 7;
@@ -859,15 +872,15 @@ bool TextWindow::DrawOrHitTestColorPicker(UiCanvas *uiCanvas, DrawOrHitHow how, 
 void TextWindow::Paint() {
     if (!canvas) return;
 
-    int width, height;
-    GetTextWindowSize(&width, &height);
+    double width, height;
+    window->GetSize(&width, &height);
 
     Camera camera = {};
     camera.width  = width;
     camera.height = height;
     camera.LoadIdentity();
-    camera.offset.x = -(double)camera.width  / 2.0;
-    camera.offset.y = -(double)camera.height / 2.0;
+    camera.offset.x = -camera.width  / 2.0;
+    camera.offset.y = -camera.height / 2.0;
 
     Lighting lighting = {};
     lighting.backgroundColor = RGBi(0, 0, 0);
@@ -897,7 +910,7 @@ void TextWindow::Paint() {
             if(ltop < (scrollPos-1)) continue;
             if(ltop > scrollPos+halfRows) break;
 
-            for(c = 0; c < min((width/CHAR_WIDTH)+1, (int) MAX_COLS); c++) {
+            for(c = 0; c < min(((int)width/CHAR_WIDTH)+1, (int) MAX_COLS); c++) {
                 int x = LEFT_MARGIN + c*CHAR_WIDTH;
                 int y = (ltop-scrollPos)*(LINE_HEIGHT/2) + 4;
 
@@ -1070,7 +1083,7 @@ void TextWindow::MouseEvent(bool leftClick, bool leftDown, double x, double y) {
         prevHoveredCol != hoveredCol)
     {
         SS.GW.Invalidate();
-        InvalidateText();
+        window->Invalidate();
     }
 }
 
@@ -1079,7 +1092,7 @@ void TextWindow::MouseLeave() {
     hoveredButton = NULL;
     hoveredRow = 0;
     hoveredCol = 0;
-    InvalidateText();
+    window->Invalidate();
 }
 
 void TextWindow::ScrollbarEvent(int newPos) {
@@ -1093,7 +1106,7 @@ void TextWindow::ScrollbarEvent(int newPos) {
     if(newPos != scrollPos) {
         scrollPos = newPos;
         MoveTextScrollbarTo(scrollPos, top[rows - 1] + 1, halfRows);
-        InvalidateText();
+        window->Invalidate();
     }
 }
 

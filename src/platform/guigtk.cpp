@@ -168,6 +168,7 @@ protected:
 
     bool process_key_event(KeyboardEvent::Type type, GdkEventKey *gdk_event) {
         KeyboardEvent event = {};
+        event.type = type;
 
         char32_t chr = gdk_keyval_to_unicode(gdk_keyval_to_lower(gdk_event->keyval));
         if(chr != 0) {
@@ -611,14 +612,6 @@ public:
         gtkWindow.set_title(title + " — SolveSpace");
     }
 
-    void SetTooltip(const std::string &text) override {
-        if(text.empty()) {
-            gtkWindow.get_gl_widget().set_has_tooltip(false);
-        } else {
-            gtkWindow.get_gl_widget().set_tooltip_text(text);
-        }
-    }
-
     void SetMenuBar(MenuBarRef newMenuBar) override {
         menuBar = newMenuBar;
         if(menuBar) {
@@ -626,6 +619,30 @@ public:
             gtkWindow.set_menu_bar(gtkMenuBar);
         } else {
             gtkWindow.set_menu_bar(NULL);
+        }
+    }
+
+    void SetKind(Kind kind) override {
+        switch(kind) {
+            case Kind::TOPLEVEL:
+                gtkWindow.set_type_hint(Gdk::WINDOW_TYPE_HINT_NORMAL);
+                gtkWindow.set_skip_taskbar_hint(false);
+                gtkWindow.set_skip_pager_hint(false);
+                break;
+
+            case Kind::TOOL:
+                gtkWindow.set_type_hint(Gdk::WINDOW_TYPE_HINT_UTILITY);
+                gtkWindow.set_skip_taskbar_hint(true);
+                gtkWindow.set_skip_pager_hint(true);
+                break;
+        }
+    }
+
+    void SetTooltip(const std::string &text) override {
+        if(text.empty()) {
+            gtkWindow.get_gl_widget().set_has_tooltip(false);
+        } else {
+            gtkWindow.get_gl_widget().set_tooltip_text(text);
         }
     }
 

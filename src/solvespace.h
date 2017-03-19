@@ -165,11 +165,6 @@ void HideTextEditControl();
 bool TextEditControlIsVisible();
 void MoveTextScrollbarTo(int pos, int maxPos, int page);
 
-void ShowTextWindow(bool visible);
-void InvalidateText();
-void GetTextWindowSize(int *w, int *h);
-int64_t GetMilliseconds();
-
 void dbp(const char *str, ...);
 #define DBPTRI(tri) \
     dbp("tri: (%.3f %.3f %.3f) (%.3f %.3f %.3f) (%.3f %.3f %.3f)", \
@@ -264,6 +259,7 @@ void MakeMatrix(double *mat, double a11, double a12, double a13, double a14,
                              double a41, double a42, double a43, double a44);
 void MultMatrix(double *mata, double *matb, double *matr);
 
+int64_t GetMilliseconds();
 void Message(const char *str, ...);
 void Error(const char *str, ...);
 void CnfFreezeBool(bool v, const std::string &name);

@@ -275,6 +275,7 @@ public:
     int top[MAX_ROWS]; // in half-line units, or -1 for unused
     int rows;
 
+    Platform::WindowRef window;
     std::shared_ptr<ViewportCanvas> canvas;
 
     void Draw(Canvas *canvas);

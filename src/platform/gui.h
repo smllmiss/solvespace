@@ -123,6 +123,11 @@ typedef std::shared_ptr<MenuBar> MenuBarRef;
 // A native top-level window, with an OpenGL context, and an editor overlay.
 class Window {
 public:
+    enum class Kind {
+        TOPLEVEL,
+        TOOL,
+    };
+
     std::function<void()>               onClose;
     std::function<void(bool)>           onFullScreen;
     std::function<bool(MouseEvent)>     onMouseEvent;
@@ -144,6 +149,7 @@ public:
     virtual void SetTitle(const std::string &title) = 0;
     virtual bool SetTitleForFilename(const Path &filename) { return false; }
     virtual void SetMenuBar(MenuBarRef menuBar) = 0;
+    virtual void SetKind(Kind kind) = 0;
     virtual void SetTooltip(const std::string &text) = 0;
 
     virtual void ShowEditor(double x, double y, double fontHeight, int widthInChars,
