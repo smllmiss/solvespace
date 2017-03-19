@@ -280,10 +280,8 @@ public:
 
     void Draw(Canvas *canvas);
 
-    // These are called by the platform-specific code.
     void Paint();
     void MouseEvent(bool isClick, bool leftDown, double x, double y);
-    void MouseScroll(double x, double y, int delta);
     void MouseLeave();
     void ScrollbarEvent(int newPos);
 

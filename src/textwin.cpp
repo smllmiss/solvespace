@@ -226,6 +226,25 @@ void TextWindow::Init() {
     if(!window) {
         window = Platform::CreateWindow();
         if(window) {
+            window->onClose = []() {
+                SS.GW.showTextWindow = false;
+                SS.GW.EnsureValidActives();
+            };
+            window->onMouseEvent = [this](Platform::MouseEvent event) {
+                using Platform::MouseEvent;
+
+                if(event.type == MouseEvent::Type::PRESS ||
+                   event.type == MouseEvent::Type::MOTION) {
+                    bool isClick  = (event.type == MouseEvent::Type::PRESS);
+                    bool leftDown = (event.button == MouseEvent::Button::LEFT);
+                    this->MouseEvent(isClick, leftDown, event.x, event.y);
+                    return true;
+                } else if(event.type == MouseEvent::Type::LEAVE) {
+                    MouseLeave();
+                    return true;
+                }
+                return false;
+            };
             window->onRender = std::bind(&TextWindow::Paint, this);
             window->SetKind(Platform::Window::Kind::TOOL);
             window->SetVisible(true);
@@ -876,11 +895,13 @@ void TextWindow::Paint() {
     window->GetSize(&width, &height);
 
     Camera camera = {};
-    camera.width  = width;
-    camera.height = height;
+    camera.width      = width;
+    camera.height     = height;
+    camera.pixelRatio = window->GetFractionalScaleFactor();
+    camera.gridFit    = (window->GetFractionalScaleFactor() == 1.0);
     camera.LoadIdentity();
-    camera.offset.x = -camera.width  / 2.0;
-    camera.offset.y = -camera.height / 2.0;
+    camera.offset.x   = -camera.width  / 2.0;
+    camera.offset.y   = -camera.height / 2.0;
 
     Lighting lighting = {};
     lighting.backgroundColor = RGBi(0, 0, 0);
