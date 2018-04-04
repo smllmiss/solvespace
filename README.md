@@ -1,3 +1,5 @@
+[![Build Status](https://gu3ms.visualstudio.com/_apis/public/build/definitions/170c5ffa-9ef7-4b56-93f4-adff7b87706c/1/badge)](https://gu3ms.visualstudio.com/MyFirstProject/_build/index?definitionId=1)
+
 SolveSpace
 ==========
 
