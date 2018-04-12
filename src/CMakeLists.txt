@@ -409,3 +409,7 @@ if(APPLE)
     add_custom_target(${bundle}-dmg ALL
         DEPENDS ${EXECUTABLE_OUTPUT_PATH}/${bundle}.dmg)
 endif()
+
+#issue 116
+
+if(MSVC) set(CMAKE_EXE_LINKER_FLAGS "/STACK:33554432 ${CMAKE_EXE_LINKER_FLAGS}") endif()
