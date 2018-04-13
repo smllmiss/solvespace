@@ -26,7 +26,7 @@ static ToolIcon Toolbar[] = {
       N_("Sketch image from a file"),                         {} },
 	{ "length",          Command::DISTANCE_DIA,
       N_("Constrain distance / diameter / length"),           {} },
-	{ "",                Command::NONE, "",                   {} },
+	{ "",                Command::NONE, "",               {} },
 	
 	{ "line",            Command::LINE_SEGMENT,
       N_("Sketch line segment"),                              {} },
@@ -44,7 +44,7 @@ static ToolIcon Toolbar[] = {
       N_("Constrain to be parallel or tangent"),              {} },
     	{ "perpendicular",   Command::PERPENDICULAR,
       N_("Constrain to be perpendicular"),                    {} },
-    	{ "",                Command::NONE, "",                   {} },
+    	{ "",                Command::NONE, "",               {} },
 	
 	{ "text",            Command::TTF_TEXT,
       N_("Sketch curves from text in a TrueType font"),       {} },
