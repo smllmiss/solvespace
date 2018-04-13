@@ -5,6 +5,12 @@
 //
 // Copyright 2008-2013 Jonathan Westhues.
 //-----------------------------------------------------------------------------
+
+//
+// edit: configured toolbar for doggett's purposes
+//
+//
+
 #include "solvespace.h"
 
 struct ToolIcon {
@@ -13,17 +19,39 @@ struct ToolIcon {
     const char *tooltip;
     std::shared_ptr<Pixmap> pixmap;
 };
+
+// check function of each ToolIcon
 static ToolIcon Toolbar[] = {
-	{ "arc",             Command::ARC,
-	  N_("Sketch arc of a circle"),                           {} },
-	{ "rectangle",       Command::RECTANGLE,
-	  N_("Sketch rectangle"),                                 {} },
+	{ "image",           Command::IMAGE,
+      N_("Sketch image from a file"),                         {} },
+	{ "length",          Command::DISTANCE_DIA,
+      N_("Constrain distance / diameter / length"),           {} },
+	{ "",                Command::NONE, "",                   {} },
+	
+	{ "line",            Command::LINE_SEGMENT,
+      N_("Sketch line segment"),                              {} },
+	{ "bezier",          Command::CUBIC,
+      N_("Sketch cubic Bezier spline"),                       {} },  
+	{ "tangent-arc",     Command::TANGENT_ARC,
+      N_("Create tangent arc at selected point"),             {} },
+	{ "angle",           Command::ANGLE,
+      N_("Constrain angle"),                                  {} },
+	{ "horiz",           Command::HORIZONTAL,
+      N_("Constrain to be horizontal"),                       {} },
+    	{ "vert",            Command::VERTICAL,
+      N_("Constrain to be vertical"),                         {} },
+	{ "parallel",        Command::PARALLEL,
+      N_("Constrain to be parallel or tangent"),              {} },
+    	{ "perpendicular",   Command::PERPENDICULAR,
+      N_("Constrain to be perpendicular"),                    {} },
+    	{ "",                Command::NONE, "",                   {} },
+	
 	{ "text",            Command::TTF_TEXT,
-	  N_("Sketch curves from text in a TrueType font"),       {} },
-	{ "step-rotate",     Command::GROUP_ROT,
-	  N_("New group step and repeat rotating"),               {} },
-	{ "",                Command::NONE, "",{} },
+      N_("Sketch curves from text in a TrueType font"),       {} },
+    	{ "ontoworkplane",   Command::ONTO_WORKPLANE,
+      N_("Align view to active workplane"),                   {} },
 };
+
 
 void GraphicsWindow::ToolbarDraw(UiCanvas *canvas) {
     ToolbarDrawOrHitTest(0, 0, canvas, NULL);
