@@ -4,6 +4,13 @@
 //
 // Copyright 2008-2013 Jonathan Westhues.
 //-----------------------------------------------------------------------------
+
+//
+// edit: 
+// maybe added support for opening raster file (line 451)
+//
+//
+
 #include "solvespace.h"
 #include "config.h"
 
