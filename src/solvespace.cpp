@@ -125,6 +125,7 @@ void SolveSpaceUI::Init() {
 
     NewFile();
     AfterNewFile();
+	Message(_("Get some of that senior design here!"));
 }
 
 bool SolveSpaceUI::LoadAutosaveFor(const Platform::Path &filename) {
@@ -454,7 +455,6 @@ void SolveSpaceUI::MenuFile(Command id) {
             Platform::Path newFile;
             if(GetOpenFile(&newFile, "", SlvsFileFilter)) {
                 SS.Load(newFile);
-            }
             break;
         }
 
