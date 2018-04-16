@@ -101,6 +101,12 @@ const GraphicsWindow::MenuEntry GraphicsWindow::menu[] = {
 { 1, N_("Dimensions in &Feet"),  		Command::UNITS_MM,         0,       TR, mView },
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
 { 1, N_("&Full Screen"),                Command::FULL_SCREEN,      C|F(11), TC, mView },
+{ 0, N_("&Help"),                       Command::NONE,             0,       TN, NULL  },
+{ 1, N_("&Website / Manual"),           Command::WEBSITE,          0,       TN, mHelp },
+{ 1, N_("&Language"),                   Command::LOCALE,           0,       TN, mHelp },
+#ifndef __APPLE__
+{ 1, N_("&About"),                      Command::ABOUT,            0,       TN, mHelp },
+#endif
 //
 { 0, NULL,                  Command::NONE,             0,       TN, NULL  },
 { 1, NULL,               Command::GROUP_3D,         S|'3',   TN, mGrp  },
@@ -174,12 +180,6 @@ const GraphicsWindow::MenuEntry GraphicsWindow::menu[] = {
 { 1, NULL,            					Command::STOP_TRACING,     C|S|'S', TN, mAna  },
 { 1, NULL,          					Command::STEP_DIM,         C|S|'D', TN, mAna  },
 //
-{ 0, N_("&Help"),                       Command::NONE,             0,       TN, NULL  },
-{ 1, N_("&Website / Manual"),           Command::WEBSITE,          0,       TN, mHelp },
-{ 1, N_("&Language"),                   Command::LOCALE,           0,       TN, mHelp },
-#ifndef __APPLE__
-{ 1, N_("&About"),                      Command::ABOUT,            0,       TN, mHelp },
-#endif
 { -1, 0,                                Command::NONE,             0,       TN, 0     }
 };
 
