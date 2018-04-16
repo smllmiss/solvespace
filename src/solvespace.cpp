@@ -125,7 +125,6 @@ void SolveSpaceUI::Init() {
 
     NewFile();
     AfterNewFile();
-	Message(_("Get some of that senior design here!"));
 }
 
 bool SolveSpaceUI::LoadAutosaveFor(const Platform::Path &filename) {
@@ -352,6 +351,7 @@ void SolveSpaceUI::AfterNewFile() {
     Style::CreateAllDefaultStyles();
 
     UpdateWindowTitle();
+	Message(_("Get some of that senior design here!"));
 }
 
 void SolveSpaceUI::RemoveFromRecentList(const Platform::Path &filename) {
