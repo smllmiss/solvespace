@@ -6,6 +6,14 @@
 //-----------------------------------------------------------------------------
 #include "solvespace.h"
 
+//
+// added 
+// DoStringForSplashBox()
+// Splash()
+//
+//
+
+
 std::string SolveSpace::ssprintf(const char *fmt, ...)
 {
     va_list va;
@@ -149,6 +157,62 @@ static void DoStringForMessageBox(const char *str, va_list f, bool error)
     // And then display the text with our actual longest line length.
     DoMessageBox(outBuf, rows, cols, error);
 }
+
+static void DoStringForSplashBox(const char *str, va_list f)
+{
+    char inBuf[1024*50];
+    vsprintf(inBuf, str, f);
+
+    char outBuf[1024*50];
+    int i = 0, j = 0, len = 0, longestLen = 47;
+    int rows = 0, cols = 0;
+
+    // Count the width of the longest line that starts with spaces; those
+    // are list items, that should not be split in the middle.
+    bool listLine = false;
+    while(inBuf[i]) {
+        if(inBuf[i] == '\r') {
+            // ignore these
+        } else if(inBuf[i] == ' ' && len == 0) {
+            listLine = true;
+        } else if(inBuf[i] == '\n') {
+            if(listLine) longestLen = max(longestLen, len);
+            len = 0;
+        } else {
+            len++;
+        }
+        i++;
+    }
+    if(listLine) longestLen = max(longestLen, len);
+
+    // Word wrap according to our target line length longestLen.
+    len = 0;
+    i = 0;
+    while(inBuf[i]) {
+        if(inBuf[i] == '\r') {
+            // ignore these
+        } else if(inBuf[i] == '\n') {
+            outBuf[j++] = '\n';
+            if(len == 0) rows++;
+            len = 0;
+        } else if(inBuf[i] == ' ' && len > longestLen) {
+            outBuf[j++] = '\n';
+            len = 0;
+        } else {
+            outBuf[j++] = inBuf[i];
+            // Count rows when we draw the first character; so an empty
+            // row doesn't end up counting.
+            if(len == 0) rows++;
+            len++;
+        }
+        cols = max(cols, len);
+        i++;
+    }
+    outBuf[j++] = '\0';
+
+    // And then display the text with our actual longest line length.
+    SplashBox(outBuf, rows, cols);
+}
 void SolveSpace::Error(const char *str, ...)
 {
     va_list f;
@@ -161,6 +225,14 @@ void SolveSpace::Message(const char *str, ...)
     va_list f;
     va_start(f, str);
     DoStringForMessageBox(str, f, /*error=*/false);
+    va_end(f);
+}
+// splash screen
+void SolveSpace::Splash(const char *str, ...)
+{
+    va_list f;
+    va_start(f, str);
+    DoStringForSplashBox(str, f);
     va_end(f);
 }
 
