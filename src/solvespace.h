@@ -4,6 +4,10 @@
 // Copyright 2008-2013 Jonathan Westhues.
 //-----------------------------------------------------------------------------
 
+//
+// added splash() and splashbox() declarations
+//
+
 #ifndef __SOLVESPACE_H
 #define __SOLVESPACE_H
 
@@ -202,6 +206,7 @@ void dbp(const char *str, ...);
 void SetCurrentFilename(const Platform::Path &filename);
 void SetMousePointerToHand(bool yes);
 void DoMessageBox(const char *str, int rows, int cols, bool error);
+void SplashBox(const char *str, int rows, int cols);
 void SetTimerFor(int milliseconds);
 void SetAutosaveTimerFor(int minutes);
 void ScheduleLater();
@@ -296,6 +301,7 @@ void MultMatrix(double *mata, double *matb, double *matr);
 std::string MakeAcceleratorLabel(int accel);
 void Message(const char *str, ...);
 void Error(const char *str, ...);
+void Splash(const char *str, ...);
 void CnfFreezeBool(bool v, const std::string &name);
 void CnfFreezeColor(RgbaColor v, const std::string &name);
 bool CnfThawBool(bool v, const std::string &name);
