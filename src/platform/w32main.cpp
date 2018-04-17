@@ -1552,6 +1552,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     // And now it's the message loop. All calls in to the rest of the code
     // will be from the wndprocs.
+	
+	Message(_("Get some of that senior design here!"));
     MSG msg;
     DWORD ret;
     while((ret = GetMessage(&msg, NULL, 0, 0)) != 0) {
