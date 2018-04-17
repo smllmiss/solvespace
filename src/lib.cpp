@@ -33,6 +33,11 @@ void SolveSpace::DoMessageBox(const char *, int, int, bool)
     abort();
 }
 
+void SolveSpace::SplashBox(const char *, int, int)
+{
+    abort();
+}
+
 extern "C" {
 
 void Slvs_QuaternionU(double qw, double qx, double qy, double qz,
