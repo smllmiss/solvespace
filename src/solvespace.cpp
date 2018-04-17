@@ -4,13 +4,6 @@
 //
 // Copyright 2008-2013 Jonathan Westhues.
 //-----------------------------------------------------------------------------
-
-//
-// edit: 
-// maybe added support for opening raster file (line 451)
-//
-//
-
 #include "solvespace.h"
 #include "config.h"
 
@@ -351,7 +344,6 @@ void SolveSpaceUI::AfterNewFile() {
     Style::CreateAllDefaultStyles();
 
     UpdateWindowTitle();
-	// Message(_("Get some of that senior design here!"));
 }
 
 void SolveSpaceUI::RemoveFromRecentList(const Platform::Path &filename) {
@@ -455,6 +447,7 @@ void SolveSpaceUI::MenuFile(Command id) {
             Platform::Path newFile;
             if(GetOpenFile(&newFile, "", SlvsFileFilter)) {
                 SS.Load(newFile);
+            }
             break;
         }
 
