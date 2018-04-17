@@ -79,7 +79,7 @@ SiHdl SpaceNavigator = SI_NO_HANDLE;
 // Utility routines
 //-----------------------------------------------------------------------------
 std::wstring Title(const std::string &s) {
-    return Widen("SolveSpace - " + s);
+    return Widen("Wall Panel Layout, Assembly, & Inventory Program - " + s);
 }
 
 //-----------------------------------------------------------------------------
@@ -88,17 +88,21 @@ std::wstring Title(const std::string &s) {
 // there's word wrap problems.
 //-----------------------------------------------------------------------------
 
-HWND MessageWnd, OkButton;
+HWND MessageWnd, OkButton, SplashWnd, LoadButton, InvButton;
 bool MessageDone;
 int MessageWidth, MessageHeight;
 const char *MessageString;
+
+// added load and inv commands
 
 static LRESULT CALLBACK MessageProc(HWND hwnd, UINT msg, WPARAM wParam,
     LPARAM lParam)
 {
     switch (msg) {
         case WM_COMMAND:
-            if((HWND)lParam == OkButton && wParam == BN_CLICKED) {
+            if(((HWND)lParam == OkButton && wParam == BN_CLICKED) || 
+				((HWND)lParam == LoadButton && wParam == BN_CLICKED) ||
+				((HWND)lParam == InvButton && wParam == BN_CLICKED)) {
                 MessageDone = true;
             }
             break;
@@ -212,6 +216,97 @@ void SolveSpace::DoMessageBox(const char *str, int rows, int cols, bool error)
     EnableWindow(GraphicsWnd, true);
     SetForegroundWindow(GraphicsWnd);
     DestroyWindow(MessageWnd);
+}
+
+void SolveSpace::SplashBox(const char *str, int rows, int cols)
+{
+    EnableWindow(GraphicsWnd, false);
+    EnableWindow(TextWnd, false);
+
+    // Register the window class for our dialog.
+    WNDCLASSEX wc = {};
+    wc.cbSize           = sizeof(wc);
+    wc.style            = CS_BYTEALIGNCLIENT | CS_BYTEALIGNWINDOW | CS_OWNDC;
+    wc.lpfnWndProc      = (WNDPROC)MessageProc;
+    wc.hInstance        = Instance;
+    wc.hbrBackground    = (HBRUSH)COLOR_BTNSHADOW;
+    wc.lpszClassName    = L"SplashWnd";
+    wc.lpszMenuName     = NULL;
+    wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
+    wc.hIcon            = (HICON)LoadImage(Instance, MAKEINTRESOURCE(4000),
+                            IMAGE_ICON, 32, 32, 0);
+    wc.hIconSm          = (HICON)LoadImage(Instance, MAKEINTRESOURCE(4000),
+                            IMAGE_ICON, 16, 16, 0);
+    RegisterClassEx(&wc);
+
+    // Create the window.
+    MessageString = str;
+    RECT r;
+    GetWindowRect(GraphicsWnd, &r);
+    int width  = cols*SS.TW.CHAR_WIDTH_ + 20,
+        height = rows*SS.TW.LINE_HEIGHT + 60;
+    MessageWidth = width;
+    MessageHeight = height;
+    SplashWnd = CreateWindowClient(0, L"SplashWnd",
+        (Title(C_("title", "Welcome"))).c_str(),
+        WS_OVERLAPPED | WS_SYSMENU,
+        r.left + 100, r.top + 100, width, height, NULL, NULL, Instance, NULL);
+
+	// fix the sizing
+	
+    LoadButton = CreateWindowExW(0, WC_BUTTON, Widen(C_("button", "Load")).c_str(),
+        WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
+        (width - 70)/2, 
+		rows*SS.TW.LINE_HEIGHT + 20,
+        70, 
+		25, 
+		SplashWnd, 
+		NULL, 
+		Instance, 
+		NULL
+		);
+		
+	InvButton = CreateWindowExW(0, WC_BUTTON, Widen(C_("button", "Inventory")).c_str(),
+        WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
+        (width - 70)/2, 
+		rows*SS.TW.LINE_HEIGHT + 20,
+        70, 
+		25, 
+		SplashWnd, 
+		NULL, 
+		Instance, 
+		NULL
+		);	
+
+    SendMessage(LoadButton, WM_SETFONT, (WPARAM)FixedFont, true);
+	SendMessage(InvButton, WM_SETFONT, (WPARAM)FixedFont, true);
+	
+    ShowWindow(SplashWnd, true);
+    SetFocus(InvButton);
+
+    MSG msg;
+    DWORD ret;
+    MessageDone = false;
+    while((ret = GetMessage(&msg, NULL, 0, 0)) != 0 && !MessageDone) {
+        if((msg.message == WM_KEYDOWN &&
+               (msg.wParam == VK_RETURN ||
+                msg.wParam == VK_ESCAPE)) ||
+            (msg.message == WM_KEYUP &&
+               (msg.wParam == VK_SPACE)))
+        {
+            MessageDone = true;
+            break;
+        }
+
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    MessageString = NULL;
+    EnableWindow(TextWnd, true);
+    EnableWindow(GraphicsWnd, true);
+    SetForegroundWindow(GraphicsWnd);
+    DestroyWindow(SplashWnd);
 }
 
 void SolveSpace::AddContextMenuItem(const char *label, ContextCommand cmd)
@@ -1449,6 +1544,40 @@ void SolveSpace::RefreshLocale() {
 
     SetWindowTextW(TextWnd, Title(C_("title", "Property Browser")).c_str());
 }
+//
+//
+//
+// PROBABLY REMOVE
+//
+//
+//
+/*
+int DisplaySplashScreen()
+{
+    int msgboxID = MessageBox(
+        NULL,
+        (LPCWSTR)L"Resource not available\nDo you want to try again?",
+        (LPCWSTR)L"Account Details",
+        MB_ICONWARNING | MB_CANCELTRYCONTINUE | MB_DEFBUTTON2
+    );
+
+    switch (msgboxID)
+    {
+    case IDCANCEL:
+        // TODO: add code
+        break;
+    case IDTRYAGAIN:
+        // TODO: add code
+        break;
+    case IDCONTINUE:
+        // TODO: add code
+        break;
+    }
+
+    return msgboxID;
+}
+*/
+
 
 #ifdef HAVE_SPACEWARE
 //-----------------------------------------------------------------------------
@@ -1552,7 +1681,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     // And now it's the message loop. All calls in to the rest of the code
     // will be from the wndprocs.
-	LoadAutosaveYesNo();
+	Splash(_("Slash on bish.\n"));
 	/*
 	Message(_("Wall Panel Layout, Assembly and Inventory Management.\n"
 "\n"
