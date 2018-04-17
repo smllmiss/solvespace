@@ -1553,7 +1553,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     // And now it's the message loop. All calls in to the rest of the code
     // will be from the wndprocs.
 	
-	Message(_("Get some of that senior design here!"));
+	Message(_("Wall Panel Layout, Assembly and Inventory Management.\n"
+"\n"
+"\n"
+" ___________        ___________        ___________    \n"
+"[           ]      [           ]      [           ]   \n"
+"[           ]      [           ]      [           ]   \n"
+"[    NEW    ]      [   OPEN    ]      [ INVENTORY ]   \n"
+"[           ]      [           ]      [           ]   \n"
+"[           ]      [           ]      [           ]   \n"
+"[___________]      [___________]      [___________]   \n"
+"Developed w/open-source code http://solvespace.com/\n"
+"\n"
+"© 2008-2016 Jonathan Westhues and other authors.\n"));
+
     MSG msg;
     DWORD ret;
     while((ret = GetMessage(&msg, NULL, 0, 0)) != 0) {
