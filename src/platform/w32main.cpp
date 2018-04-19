@@ -8,7 +8,7 @@
 #include <time.h>
 
 #include "config.h"
-#include "solvespace.h"
+#include "../solvespace.h"
 
 // Include after solvespace.h to avoid identifier clashes.
 #include <windows.h>
