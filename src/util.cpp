@@ -211,7 +211,7 @@ static void DoStringForSplashBox(const char *str, va_list f)
     outBuf[j++] = '\0';
 
     // And then display the text with our actual longest line length.
-    SplashBox(outBuf, rows, cols);
+    SolveSpace::SplashBox(outBuf, rows, cols);
 }
 void SolveSpace::Error(const char *str, ...)
 {
