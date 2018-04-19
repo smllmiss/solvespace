@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------------
 #include "solvespace.h"
 
+using namespace SolveSpace;
 //
 // added 
 // DoStringForSplashBox()
