@@ -296,6 +296,7 @@ void SolveSpace::SplashBox(const char *str, int rows, int cols)
     DestroyWindow(SplashWnd);
     
     */
+	abort();
 }
 
 void SolveSpace::AddContextMenuItem(const char *label, ContextCommand cmd)
