@@ -1531,13 +1531,7 @@ void SolveSpace::RefreshLocale() {
 
     SetWindowTextW(TextWnd, Title(C_("title", "Property Browser")).c_str());
 }
-//
-//
-//
-// PROBABLY REMOVE
-//
-//
-//
+
 
 #ifdef HAVE_SPACEWARE
 //-----------------------------------------------------------------------------
@@ -1641,7 +1635,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     // And now it's the message loop. All calls in to the rest of the code
     // will be from the wndprocs.
-	SplashBox("Wall Panel Layout, Assembly and Inventory Management.\n", 25, 15);
+	SplashBox("Wall Panel Layout, Assembly and Inventory Management.\n", 10, 25);
     MSG msg;
     DWORD ret;
     while((ret = GetMessage(&msg, NULL, 0, 0)) != 0) {
