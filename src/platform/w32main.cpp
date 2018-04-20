@@ -1641,15 +1641,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     // And now it's the message loop. All calls in to the rest of the code
     // will be from the wndprocs.
-	SplashBox("Wall Panel Layout, Assembly and Inventory Management.\n
-		  \n
-		  \n
-		  \n
-		  Developed w/open-source code http://solvespace.com/\n
-		  \n
-                  © 2008-2016 Jonathan Westhues and other authors.\n", 
-		  15, 
-		  15);
+	SplashBox("Wall Panel Layout, Assembly and Inventory Management.\n", 15, 15);
 	/*
 	Message(_("Wall Panel Layout, Assembly and Inventory Management.\n"
 "\n"
