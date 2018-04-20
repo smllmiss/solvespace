@@ -158,7 +158,7 @@ static void DoStringForMessageBox(const char *str, va_list f, bool error)
     // And then display the text with our actual longest line length.
     DoMessageBox(outBuf, rows, cols, error);
 }
-
+/*
 static void DoStringForSplashBox(const char *str, va_list f)
 {
     char inBuf[1024*50];
@@ -212,11 +212,11 @@ static void DoStringForSplashBox(const char *str, va_list f)
     outBuf[j++] = '\0';
 
     // And then display the text with our actual longest line length.
-    /*
+    
     SolveSpace::SplashBox(outBuf, rows, cols);
-    */
-    abort();
+
 }
+*/
 void SolveSpace::Error(const char *str, ...)
 {
     va_list f;
@@ -232,6 +232,7 @@ void SolveSpace::Message(const char *str, ...)
     va_end(f);
 }
 // splash screen
+/*
 void SolveSpace::Splash(const char *str, ...)
 {
     va_list f;
@@ -239,7 +240,7 @@ void SolveSpace::Splash(const char *str, ...)
     DoStringForSplashBox(str, f);
     va_end(f);
 }
-
+*/
 void SolveSpace::CnfFreezeBool(bool v, const std::string &name)
     { CnfFreezeInt(v ? 1 : 0, name); }
 
