@@ -1668,7 +1668,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     // And now it's the message loop. All calls in to the rest of the code
     // will be from the wndprocs.
-	Splash(_("Slash on bish.\n"));
+	SplashBox("Slash on bish.\n", 30, 40);
 	/*
 	Message(_("Wall Panel Layout, Assembly and Inventory Management.\n"
 "\n"
