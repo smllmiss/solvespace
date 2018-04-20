@@ -257,12 +257,12 @@ void SolveSpace::SplashBox(const char *str, int rows, int cols)
 	
     LoadButton = CreateWindowExW(0, WC_BUTTON, Widen(C_("button", "Load")).c_str(),
         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
-        (width - 70)/2, rows*SS.TW.LINE_HEIGHT + 20, 
+        (width - 10)/2, rows*SS.TW.LINE_HEIGHT + 20, 
 		70, 25, SplashWnd, NULL, Instance, NULL);
 		
-	InvButton = CreateWindowExW(0, WC_BUTTON, Widen(C_("button", "Inventory")).c_str(),
+    InvButton = CreateWindowExW(0, WC_BUTTON, Widen(C_("button", "Inventory")).c_str(),
         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
-        (width - 70)/2, rows*SS.TW.LINE_HEIGHT + 20,
+        (width - 90)/2, rows*SS.TW.LINE_HEIGHT + 20,
         70, 25, SplashWnd, NULL, Instance, NULL);	
 
     SendMessage(LoadButton, WM_SETFONT, (WPARAM)FixedFont, true);
@@ -1538,33 +1538,6 @@ void SolveSpace::RefreshLocale() {
 //
 //
 //
-/*
-int DisplaySplashScreen()
-{
-    int msgboxID = MessageBox(
-        NULL,
-        (LPCWSTR)L"Resource not available\nDo you want to try again?",
-        (LPCWSTR)L"Account Details",
-        MB_ICONWARNING | MB_CANCELTRYCONTINUE | MB_DEFBUTTON2
-    );
-
-    switch (msgboxID)
-    {
-    case IDCANCEL:
-        // TODO: add code
-        break;
-    case IDTRYAGAIN:
-        // TODO: add code
-        break;
-    case IDCONTINUE:
-        // TODO: add code
-        break;
-    }
-
-    return msgboxID;
-}
-*/
-
 
 #ifdef HAVE_SPACEWARE
 //-----------------------------------------------------------------------------
@@ -1668,7 +1641,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     // And now it's the message loop. All calls in to the rest of the code
     // will be from the wndprocs.
-	SplashBox("Slash on bish.\n", 30, 40);
+	SplashBox("Wall Panel Layout, Assembly and Inventory Management.\n
+		  \n
+		  \n
+		  \n
+		  Developed w/open-source code http://solvespace.com/\n
+		  \n
+                  © 2008-2016 Jonathan Westhues and other authors.\n", 
+		  15, 
+		  15);
 	/*
 	Message(_("Wall Panel Layout, Assembly and Inventory Management.\n"
 "\n"
