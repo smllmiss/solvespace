@@ -301,7 +301,7 @@ void MultMatrix(double *mata, double *matb, double *matr);
 std::string MakeAcceleratorLabel(int accel);
 void Message(const char *str, ...);
 void Error(const char *str, ...);
-void Splash(const char *str, ...);
+// void Splash(const char *str, ...);
 void CnfFreezeBool(bool v, const std::string &name);
 void CnfFreezeColor(RgbaColor v, const std::string &name);
 bool CnfThawBool(bool v, const std::string &name);
