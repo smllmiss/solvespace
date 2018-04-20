@@ -220,7 +220,7 @@ void SolveSpace::DoMessageBox(const char *str, int rows, int cols, bool error)
 
 void SolveSpace::SplashBox(const char *str, int rows, int cols)
 {
-	/*
+	
     EnableWindow(GraphicsWnd, false);
     EnableWindow(TextWnd, false);
 
@@ -294,9 +294,6 @@ void SolveSpace::SplashBox(const char *str, int rows, int cols)
     EnableWindow(GraphicsWnd, true);
     SetForegroundWindow(GraphicsWnd);
     DestroyWindow(SplashWnd);
-    
-    */
-	abort();
 }
 
 void SolveSpace::AddContextMenuItem(const char *label, ContextCommand cmd)
