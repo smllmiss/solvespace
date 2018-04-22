@@ -257,12 +257,12 @@ void SolveSpace::SplashBox(const char *str, int rows, int cols)
 	
     LoadButton = CreateWindowExW(0, WC_BUTTON, Widen(C_("button", "Load")).c_str(),
         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
-        5, rows*SS.TW.LINE_HEIGHT + 0, 
+        5, rows*SS.TW.LINE_HEIGHT + 70, 
 		200, 80, SplashWnd, NULL, Instance, NULL);
 		
     InvButton = CreateWindowExW(0, WC_BUTTON, Widen(C_("button", "Inventory")).c_str(),
         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
-        600, rows*SS.TW.LINE_HEIGHT + 0,
+        400, rows*SS.TW.LINE_HEIGHT + 70,
         200, 80, SplashWnd, NULL, Instance, NULL);	
 
     SendMessage(LoadButton, WM_SETFONT, (WPARAM)FixedFont, true);
