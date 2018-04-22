@@ -98,13 +98,24 @@ const char *MessageString;
 static LRESULT CALLBACK MessageProc(HWND hwnd, UINT msg, WPARAM wParam,
     LPARAM lParam)
 {
-    switch (msg) {
-        case WM_COMMAND:
-            if(((HWND)lParam == OkButton && wParam == BN_CLICKED) || 
-				((HWND)lParam == LoadButton && wParam == BN_CLICKED) ||
-				((HWND)lParam == InvButton && wParam == BN_CLICKED)) {
-                MessageDone = true;
-            }
+	switch (msg) {
+        	case WM_COMMAND:
+          	  if((HWND)lParam == OkButton && wParam == BN_CLICKED) {
+              	  MessageDone = true;
+		    }
+		else if((HWND)lParam == InvButton && wParam == BN_CLICKED) {
+                OpenWebsite("https://www.reddit.com/");
+				MessageDone = true;
+           	 }
+		else if((HWND)lParam == LoadButton && wParam == BN_CLICKED) {
+				if(!SS.OkayToStartNewFile()) break;
+				Platform::Path newFile;
+				if(GetOpenFile(&newFile, "", SlvsFileFilter)) {
+                SS.Load(newFile);
+				break;
+				}
+				MessageDone = true;
+			}
             break;
 
         case WM_CLOSE:
@@ -256,13 +267,13 @@ void SolveSpace::SplashBox(const char *str, int rows, int cols)
 	// fix the sizing
 	
     LoadButton = CreateWindowExW(0, WC_BUTTON, Widen(C_("button", "Load")).c_str(),
-        WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
-        5, rows*SS.TW.LINE_HEIGHT - 35, 
+        WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON | BN_CLICKED,
+        35, rows*SS.TW.LINE_HEIGHT - 35, 
 	200, 80, SplashWnd, NULL, Instance, NULL);
 		
     InvButton = CreateWindowExW(0, WC_BUTTON, Widen(C_("button", "Inventory")).c_str(),
-        WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON,
-        430, rows*SS.TW.LINE_HEIGHT - 35,
+        WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON | BN_CLICKED,
+        400, rows*SS.TW.LINE_HEIGHT - 35,
         200, 80, SplashWnd, NULL, Instance, NULL);	
 
     SendMessage(LoadButton, WM_SETFONT, (WPARAM)FixedFont, true);
