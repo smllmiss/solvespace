@@ -105,7 +105,6 @@ static LRESULT CALLBACK MessageProc(HWND hwnd, UINT msg, WPARAM wParam,
 		    }
 		else if((HWND)lParam == InvButton && wParam == BN_CLICKED) {
                 OpenWebsite("https://docs.google.com/spreadsheets/d/1V7U7Kp4elvmpQ6WX14BsJrrdTJU0NZ33hyWrzrp0Cg0/edit?ts=5acd69bc#gid=114069752");
-				MessageDone = true;
            	 }
 		else if((HWND)lParam == LoadButton && wParam == BN_CLICKED) {
 				if(!SS.OkayToStartNewFile()) break;
@@ -114,7 +113,6 @@ static LRESULT CALLBACK MessageProc(HWND hwnd, UINT msg, WPARAM wParam,
                 SS.Load(newFile);
 				break;
 				}
-				MessageDone = true;
 			}
             break;
 
