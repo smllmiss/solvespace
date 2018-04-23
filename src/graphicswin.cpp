@@ -525,6 +525,10 @@ void GraphicsWindow::MenuView(Command id) {
             SS.GW.EnsureValidActives();
             InvalidateGraphics();
             break;
+            
+        case Command::INVENTORY:
+            OpenWebsite("https://docs.google.com/spreadsheets/d/1V7U7Kp4elvmpQ6WX14BsJrrdTJU0NZ33hyWrzrp0Cg0/edit#gid=114069752");
+            break;
 
         case Command::ONTO_WORKPLANE:
             if(SS.GW.LockedInWorkplane()) {
