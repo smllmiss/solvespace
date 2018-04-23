@@ -144,7 +144,7 @@ enum class Command : uint32_t {
     CENTER_VIEW,
     SHOW_TOOLBAR,
     SHOW_TEXT_WND,
-    UNITS_INCHES,
+    UNITS_FEET,
     UNITS_MM,
     FULL_SCREEN,
     // Edit
