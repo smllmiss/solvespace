@@ -155,7 +155,7 @@ DialogChoice LocateImportedFileYesNoCancel(const Platform::Path &filename,
 
 enum class Unit : uint32_t {
     MM = 0,
-    INCHES
+    FEET
 };
 
 struct FileFilter;
@@ -687,7 +687,7 @@ public:
 
     Unit     viewUnits;
     int      afterDecimalMm;
-    int      afterDecimalInch;
+    int      afterDecimalFoot;
     int      autosaveInterval; // in minutes
 
     std::string MmToString(double v);
