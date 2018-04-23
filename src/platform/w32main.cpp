@@ -266,7 +266,7 @@ void SolveSpace::SplashBox(const char *str, int rows, int cols)
 	
     LoadButton = CreateWindowExW(0, WC_BUTTON, Widen(C_("button", "Load")).c_str(),
         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON | BN_CLICKED,
-        26, rows*SS.TW.LINE_HEIGHT - 35, 
+        25, rows*SS.TW.LINE_HEIGHT - 35, 
 	200, 80, SplashWnd, NULL, Instance, NULL);
 		
     InvButton = CreateWindowExW(0, WC_BUTTON, Widen(C_("button", "Inventory")).c_str(),
@@ -301,7 +301,7 @@ void SolveSpace::SplashBox(const char *str, int rows, int cols)
     MessageString = NULL;
     EnableWindow(TextWnd, true);
     EnableWindow(GraphicsWnd, true);
-    SetForegroundWindow(GraphicsWnd);
+    //SetForegroundWindow(GraphicsWnd);
     DestroyWindow(SplashWnd);
 }
 
@@ -1644,7 +1644,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     // And now it's the message loop. All calls in to the rest of the code
     // will be from the wndprocs.
-	SplashBox("\n	   	Wall Panel Layout, Assembly and Inventory Management\n\n	  		© 2008-2016 Jonathon Westhues and other authors.", 15, 67);
+	SplashBox("\n	   	Wall Panel Layout, Assembly and Inventory Management\n\n	  		    © 2008-2016 Jonathon Westhues and other authors.", 15, 67);
     MSG msg;
     DWORD ret;
     while((ret = GetMessage(&msg, NULL, 0, 0)) != 0) {
