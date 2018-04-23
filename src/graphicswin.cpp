@@ -46,11 +46,11 @@ const GraphicsWindow::MenuEntry GraphicsWindow::menu[] = {
 { 1, N_("Export &Image..."),            Command::EXPORT_PNG,       0,       TN, mFile },
 { 1, N_("Export 2d &View..."),          Command::EXPORT_VIEW,      0,       TN, mFile },
 { 1, N_("Export 2d &Section..."),       Command::EXPORT_SECTION,   0,       TN, mFile },
-/*
+//
 { 1, NULL,     							Command::EXPORT_WIREFRAME, 0,       TN, mFile },
 { 1, NULL,    							Command::EXPORT_MESH,      0,       TN, mFile },
 { 1, NULL,         						Command::EXPORT_SURFACES,  0,       TN, mFile },
-*/
+//
 { 1, N_("Im&port..."),                  Command::IMPORT,           0,       TN, mFile },
 #ifndef __APPLE__
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
@@ -71,9 +71,9 @@ const GraphicsWindow::MenuEntry GraphicsWindow::menu[] = {
 { 1, N_("Paste &Transformed..."),       Command::PASTE_TRANSFORM,  C|'T',   TN, mClip },
 { 1, N_("&Delete"),                     Command::DELETE,           DEL,     TN, mClip },
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
-/*
+//
 { 1, NULL,         						Command::SELECT_CHAIN,     C|'E',   TN, mEdit },
-*/
+//
 { 1, N_("Select &All"),                 Command::SELECT_ALL,       C|'A',   TN, mEdit },
 { 1, N_("&Unselect All"),               Command::UNSELECT_ALL,     ESC,     TN, mEdit },
 
@@ -83,21 +83,21 @@ const GraphicsWindow::MenuEntry GraphicsWindow::menu[] = {
 { 1, N_("Zoom To &Fit"),                Command::ZOOM_TO_FIT,      'F',     TN, mView },
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
 { 1, N_("Align View to &Workplane"),    Command::ONTO_WORKPLANE,   'W',     TN, mView },
-/*
+//
 { 1, NULL,         						Command::NEAREST_ORTHO,    F(2),    TN, mView },
 { 1, NULL,     							Command::NEAREST_ISO,      F(3),    TN, mView },
 { 1, NULL,       						Command::CENTER_VIEW,      F(4),    TN, mView },
-*/
+//
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
 { 1, N_("Show Snap &Grid"),             Command::SHOW_GRID,        '>',     TC, mView },
-/*
+//
 { 1, NULL, 								Command::PERSPECTIVE_PROJ, '`',    TC, mView },
 { 1, NULL,                              Command::NONE,             0,       TN, NULL  },
 { 1, NULL,               				Command::SHOW_TOOLBAR,     0,       TC, mView },
-*/
+//
 { 1, N_("Show Property Bro&wser"),      Command::SHOW_TEXT_WND,    '\t',    TC, mView },
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
-{ 1, N_("Dimensions in &Feet"),         Command::UNITS_INCHES,     0,       TR, mView },
+{ 1, N_("Dimensions in &Feet"),         Command::UNITS_FEET,     0,       TR, mView },
 { 1, N_("Dimensions in &Millimeters"),  Command::UNITS_MM,         0,       TR, mView },
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
 { 1, N_("&Full Screen"),                Command::FULL_SCREEN,      C|F(11), TC, mView },
@@ -612,8 +612,8 @@ void GraphicsWindow::MenuView(Command id) {
             break;
 // change to feet
             
-        case Command::UNITS_INCHES:
-            SS.viewUnits = Unit::INCHES;
+        case Command::UNITS_FEET:
+            SS.viewUnits = Unit::FEET;
             SS.ScheduleShowTW();
             SS.GW.EnsureValidActives();
             break;
@@ -689,14 +689,14 @@ void GraphicsWindow::EnsureValidActives() {
 
     switch(SS.viewUnits) {
         case Unit::MM:
-        case Unit::INCHES:
+        case Unit::FEET:
             break;
         default:
             SS.viewUnits = Unit::MM;
             break;
     }
     RadioMenuByCmd(Command::UNITS_MM, SS.viewUnits == Unit::MM);
-    RadioMenuByCmd(Command::UNITS_INCHES, SS.viewUnits == Unit::INCHES);
+    RadioMenuByCmd(Command::UNITS_FEET, SS.viewUnits == Unit::FEET);
 
     ShowTextWindow(SS.GW.showTextWindow);
     CheckMenuByCmd(Command::SHOW_TEXT_WND, /*checked=*/SS.GW.showTextWindow);
