@@ -12,7 +12,7 @@
 // Future: fix parameter for dimensions in feet under view menu
 //
 //
-
+// line 613, labels
 
 #include "solvespace.h"
 
@@ -46,11 +46,11 @@ const GraphicsWindow::MenuEntry GraphicsWindow::menu[] = {
 { 1, N_("Export &Image..."),            Command::EXPORT_PNG,       0,       TN, mFile },
 { 1, N_("Export 2d &View..."),          Command::EXPORT_VIEW,      0,       TN, mFile },
 { 1, N_("Export 2d &Section..."),       Command::EXPORT_SECTION,   0,       TN, mFile },
-//
+/*
 { 1, NULL,     							Command::EXPORT_WIREFRAME, 0,       TN, mFile },
 { 1, NULL,    							Command::EXPORT_MESH,      0,       TN, mFile },
 { 1, NULL,         						Command::EXPORT_SURFACES,  0,       TN, mFile },
-//
+*/
 { 1, N_("Im&port..."),                  Command::IMPORT,           0,       TN, mFile },
 #ifndef __APPLE__
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
@@ -71,9 +71,9 @@ const GraphicsWindow::MenuEntry GraphicsWindow::menu[] = {
 { 1, N_("Paste &Transformed..."),       Command::PASTE_TRANSFORM,  C|'T',   TN, mClip },
 { 1, N_("&Delete"),                     Command::DELETE,           DEL,     TN, mClip },
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
-//
+/*
 { 1, NULL,         						Command::SELECT_CHAIN,     C|'E',   TN, mEdit },
-//
+*/
 { 1, N_("Select &All"),                 Command::SELECT_ALL,       C|'A',   TN, mEdit },
 { 1, N_("&Unselect All"),               Command::UNSELECT_ALL,     ESC,     TN, mEdit },
 
@@ -83,22 +83,22 @@ const GraphicsWindow::MenuEntry GraphicsWindow::menu[] = {
 { 1, N_("Zoom To &Fit"),                Command::ZOOM_TO_FIT,      'F',     TN, mView },
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
 { 1, N_("Align View to &Workplane"),    Command::ONTO_WORKPLANE,   'W',     TN, mView },
-//
+/*
 { 1, NULL,         						Command::NEAREST_ORTHO,    F(2),    TN, mView },
 { 1, NULL,     							Command::NEAREST_ISO,      F(3),    TN, mView },
 { 1, NULL,       						Command::CENTER_VIEW,      F(4),    TN, mView },
-//
+*/
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
 { 1, N_("Show Snap &Grid"),             Command::SHOW_GRID,        '>',     TC, mView },
-//
+/*
 { 1, NULL, 								Command::PERSPECTIVE_PROJ, '`',    TC, mView },
 { 1, NULL,                              Command::NONE,             0,       TN, NULL  },
 { 1, NULL,               				Command::SHOW_TOOLBAR,     0,       TC, mView },
-//
+*/
 { 1, N_("Show Property Bro&wser"),      Command::SHOW_TEXT_WND,    '\t',    TC, mView },
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
-{ 1, N_("Dimensions in &Inches"),       Command::UNITS_INCHES,     0,       TR, mView },
-{ 1, N_("Dimensions in &Feet"),  		Command::UNITS_MM,         0,       TR, mView },
+{ 1, N_("Dimensions in &Feet"),         Command::UNITS_INCHES,     0,       TR, mView },
+{ 1, N_("Dimensions in &Millimeters"),  Command::UNITS_MM,         0,       TR, mView },
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
 { 1, N_("&Full Screen"),                Command::FULL_SCREEN,      C|F(11), TC, mView },
 { 0, N_("&Help"),                       Command::NONE,             0,       TN, NULL  },
@@ -107,7 +107,7 @@ const GraphicsWindow::MenuEntry GraphicsWindow::menu[] = {
 #ifndef __APPLE__
 { 1, N_("&About"),                      Command::ABOUT,            0,       TN, mHelp },
 #endif
-//
+
 { 0, NULL,                  Command::NONE,             0,       TN, NULL  },
 { 1, NULL,               Command::GROUP_3D,         S|'3',   TN, mGrp  },
 { 1, NULL,    Command::GROUP_WRKPL,      S|'W',   TN, mGrp  },
@@ -179,7 +179,7 @@ const GraphicsWindow::MenuEntry GraphicsWindow::menu[] = {
 { 1, NULL,               				Command::TRACE_PT,         C|S|'T', TN, mAna  },
 { 1, NULL,            					Command::STOP_TRACING,     C|S|'S', TN, mAna  },
 { 1, NULL,          					Command::STEP_DIM,         C|S|'D', TN, mAna  },
-//
+
 { -1, 0,                                Command::NONE,             0,       TN, 0     }
 };
 
@@ -610,7 +610,8 @@ void GraphicsWindow::MenuView(Command id) {
             SS.GW.showTextWindow = !SS.GW.showTextWindow;
             SS.GW.EnsureValidActives();
             break;
-
+// change to feet
+            
         case Command::UNITS_INCHES:
             SS.viewUnits = Unit::INCHES;
             SS.ScheduleShowTW();
