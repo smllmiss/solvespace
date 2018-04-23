@@ -84,7 +84,7 @@ const GraphicsWindow::MenuEntry GraphicsWindow::menu[] = {
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
 { 1, N_("Align View to &Workplane"),    Command::ONTO_WORKPLANE,   'W',     TN, mView },
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
-{ 1,  N_("&Inventory"),                 Command::INVENTORY,        0,       TN, mView  },
+{ 1, N_("View &Inventory"),             Command::VIEW_INV,         0,       TN, mView },
 /*
 { 1, NULL,         						Command::NEAREST_ORTHO,    F(2),    TN, mView },
 { 1, NULL,     							Command::NEAREST_ISO,      F(3),    TN, mView },
@@ -525,10 +525,6 @@ void GraphicsWindow::MenuView(Command id) {
             SS.GW.EnsureValidActives();
             InvalidateGraphics();
             break;
-            
-        case Command::INVENTORY:
-            OpenWebsite("https://docs.google.com/spreadsheets/d/1V7U7Kp4elvmpQ6WX14BsJrrdTJU0NZ33hyWrzrp0Cg0/edit#gid=114069752");
-            break;
 
         case Command::ONTO_WORKPLANE:
             if(SS.GW.LockedInWorkplane()) {
@@ -590,6 +586,10 @@ void GraphicsWindow::MenuView(Command id) {
             SS.GW.AnimateOnto(quatf, SS.GW.offset);
             break;
         }
+        
+        case Command::VIEW_INV:
+            OpenWebsite("https://docs.google.com/spreadsheets/d/1V7U7Kp4elvmpQ6WX14BsJrrdTJU0NZ33hyWrzrp0Cg0/edit#gid=114069752");
+            break;
 
         case Command::CENTER_VIEW:
             SS.GW.GroupSelection();
@@ -616,7 +616,6 @@ void GraphicsWindow::MenuView(Command id) {
             SS.GW.showTextWindow = !SS.GW.showTextWindow;
             SS.GW.EnsureValidActives();
             break;
-// change to feet
             
         case Command::UNITS_FEET:
             SS.viewUnits = Unit::FEET;
