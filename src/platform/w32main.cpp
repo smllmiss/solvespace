@@ -104,7 +104,7 @@ static LRESULT CALLBACK MessageProc(HWND hwnd, UINT msg, WPARAM wParam,
               	  MessageDone = true;
 		    }
 		else if((HWND)lParam == InvButton && wParam == BN_CLICKED) {
-                OpenWebsite("https://www.reddit.com/");
+                OpenWebsite("https://docs.google.com/spreadsheets/d/1V7U7Kp4elvmpQ6WX14BsJrrdTJU0NZ33hyWrzrp0Cg0/edit?ts=5acd69bc#gid=114069752");
 				MessageDone = true;
            	 }
 		else if((HWND)lParam == LoadButton && wParam == BN_CLICKED) {
@@ -268,7 +268,7 @@ void SolveSpace::SplashBox(const char *str, int rows, int cols)
 	
     LoadButton = CreateWindowExW(0, WC_BUTTON, Widen(C_("button", "Load")).c_str(),
         WS_CHILD | WS_TABSTOP | WS_CLIPSIBLINGS | WS_VISIBLE | BS_DEFPUSHBUTTON | BN_CLICKED,
-        35, rows*SS.TW.LINE_HEIGHT - 35, 
+        30, rows*SS.TW.LINE_HEIGHT - 35, 
 	200, 80, SplashWnd, NULL, Instance, NULL);
 		
     InvButton = CreateWindowExW(0, WC_BUTTON, Widen(C_("button", "Inventory")).c_str(),
@@ -1646,7 +1646,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     // And now it's the message loop. All calls in to the rest of the code
     // will be from the wndprocs.
-	SplashBox("Wall Panel Layout, Assembly and Inventory Management\n\n© 2008-2016 Jonathon Westhues and other authors.", 25, 67);
+	SplashBox("	Wall Panel Layout, Assembly and Inventory Management\n\n	  © 2008-2016 Jonathon Westhues and other authors.", 15, 67);
     MSG msg;
     DWORD ret;
     while((ret = GetMessage(&msg, NULL, 0, 0)) != 0) {
