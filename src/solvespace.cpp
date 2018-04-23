@@ -55,7 +55,7 @@ void SolveSpaceUI::Init() {
     viewUnits = (Unit)CnfThawInt((uint32_t)Unit::MM, "ViewUnits");
     // Number of digits after the decimal point
     afterDecimalMm = CnfThawInt(2, "AfterDecimalMm");
-    afterDecimalInch = CnfThawInt(3, "AfterDecimalInch");
+    afterDecimalFoot = CnfThawInt(3, "AfterDecimalFoot");
     // Camera tangent (determines perspective)
     cameraTangent = CnfThawFloat(0.3f/1e3f, "CameraTangent");
     // Grid spacing
@@ -180,7 +180,7 @@ void SolveSpaceUI::Exit() {
     CnfFreezeInt((uint32_t)viewUnits, "ViewUnits");
     // Number of digits after the decimal point
     CnfFreezeInt((uint32_t)afterDecimalMm, "AfterDecimalMm");
-    CnfFreezeInt((uint32_t)afterDecimalInch, "AfterDecimalInch");
+    CnfFreezeInt((uint32_t)afterDecimalFoot, "AfterDecimalFoot");
     // Camera tangent (determines perspective)
     CnfFreezeFloat((float)cameraTangent, "CameraTangent");
     // Grid spacing
@@ -250,22 +250,22 @@ void SolveSpaceUI::DoLater() {
 }
 
 double SolveSpaceUI::MmPerUnit() {
-    if(viewUnits == Unit::INCHES) {
-        return 25.4;
+    if(viewUnits == Unit::FEET) {
+        return 304.8;
     } else {
         return 1.0;
     }
 }
 const char *SolveSpaceUI::UnitName() {
-    if(viewUnits == Unit::INCHES) {
-        return "inch";
+    if(viewUnits == Unit::FEET) {
+        return "foot";
     } else {
         return "mm";
     }
 }
 std::string SolveSpaceUI::MmToString(double v) {
-    if(viewUnits == Unit::INCHES) {
-        return ssprintf("%.*f", afterDecimalInch, v/25.4);
+    if(viewUnits == Unit::FEET) {
+        return ssprintf("%.*f", afterDecimalFoot, v/304.8);
     } else {
         return ssprintf("%.*f", afterDecimalMm, v);
     }
@@ -288,11 +288,11 @@ int SolveSpaceUI::GetMaxSegments() {
     return maxSegments;
 }
 int SolveSpaceUI::UnitDigitsAfterDecimal() {
-    return (viewUnits == Unit::INCHES) ? afterDecimalInch : afterDecimalMm;
+    return (viewUnits == Unit::FEET) ? afterDecimalFoot : afterDecimalMm;
 }
 void SolveSpaceUI::SetUnitDigitsAfterDecimal(int v) {
-    if(viewUnits == Unit::INCHES) {
-        afterDecimalInch = v;
+    if(viewUnits == Unit::FEET) {
+        afterDecimalFoot = v;
     } else {
         afterDecimalMm = v;
     }
