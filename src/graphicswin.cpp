@@ -84,7 +84,6 @@ const GraphicsWindow::MenuEntry GraphicsWindow::menu[] = {
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
 { 1, N_("Align View to &Workplane"),    Command::ONTO_WORKPLANE,   'W',     TN, mView },
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
-{ 1, N_("View &Inventory"),             Command::VIEW_INV,         0,       TN, mView },
 /*
 { 1, NULL,         						Command::NEAREST_ORTHO,    F(2),    TN, mView },
 { 1, NULL,     							Command::NEAREST_ISO,      F(3),    TN, mView },
@@ -586,11 +585,7 @@ void GraphicsWindow::MenuView(Command id) {
             SS.GW.AnimateOnto(quatf, SS.GW.offset);
             break;
         }
-        
-        case Command::VIEW_INV:
-            OpenWebsite("https://docs.google.com/spreadsheets/d/1V7U7Kp4elvmpQ6WX14BsJrrdTJU0NZ33hyWrzrp0Cg0/edit#gid=114069752");
-            break;
-
+            
         case Command::CENTER_VIEW:
             SS.GW.GroupSelection();
             if(SS.GW.gs.n == 1 && SS.GW.gs.points == 1) {
