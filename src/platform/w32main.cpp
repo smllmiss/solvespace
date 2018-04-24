@@ -1644,7 +1644,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     // And now it's the message loop. All calls in to the rest of the code
     // will be from the wndprocs.
-	SplashBox("\n	   		Wall Panel Layout, Assembly and Inventory Management\n\n\n\n\n\n\n\n	   	 Elizabeth Anderson, Taylor Ascher, Akash Kothari, Guthrie Shriver\n	   			Sponsored by Doggett Concrete ™\n\n\n\n				Solvespace (http://solvespace.com) is an open-source software developed by\n	  		    Jonathon Westhues and other authors © 2008-2016 .", 15, 67);
+	SplashBox("\n	   		    Wall Panel Layout, Assembly and Inventory Management\n\n\n\n\nElizabeth Anderson, Taylor Ascher, Akash Kothari, Guthrie Shriver\n	   		Sponsored by Doggett Concrete™\n\n\n\n				Solvespace (http://solvespace.com) is an open-source software\n	  		    Jonathon Westhues and other authors © 2008-2016 .", 15, 67);
     MSG msg;
     DWORD ret;
     while((ret = GetMessage(&msg, NULL, 0, 0)) != 0) {
