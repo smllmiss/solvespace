@@ -71,9 +71,9 @@ const GraphicsWindow::MenuEntry GraphicsWindow::menu[] = {
 { 1, N_("Paste &Transformed..."),       Command::PASTE_TRANSFORM,  C|'T',   TN, mClip },
 { 1, N_("&Delete"),                     Command::DELETE,           DEL,     TN, mClip },
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
-/*
+
 { 1, NULL,         						Command::SELECT_CHAIN,     C|'E',   TN, mEdit },
-*/
+
 { 1, N_("Select &All"),                 Command::SELECT_ALL,       C|'A',   TN, mEdit },
 { 1, N_("&Unselect All"),               Command::UNSELECT_ALL,     ESC,     TN, mEdit },
 
@@ -84,18 +84,18 @@ const GraphicsWindow::MenuEntry GraphicsWindow::menu[] = {
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
 { 1, N_("Align View to &Workplane"),    Command::ONTO_WORKPLANE,   'W',     TN, mView },
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
-/*
+
 { 1, NULL,         						Command::NEAREST_ORTHO,    F(2),    TN, mView },
 { 1, NULL,     							Command::NEAREST_ISO,      F(3),    TN, mView },
 { 1, NULL,       						Command::CENTER_VIEW,      F(4),    TN, mView },
-*/
+
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
 { 1, N_("Show Snap &Grid"),             Command::SHOW_GRID,        '>',     TC, mView },
-/*
+
 { 1, NULL, 								Command::PERSPECTIVE_PROJ, '`',    TC, mView },
 { 1, NULL,                              Command::NONE,             0,       TN, NULL  },
 { 1, NULL,               				Command::SHOW_TOOLBAR,     0,       TC, mView },
-*/
+
 { 1, N_("Show Property Bro&wser"),      Command::SHOW_TEXT_WND,    '\t',    TC, mView },
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
 { 1, N_("Dimensions in &Feet"),         Command::UNITS_FEET,     0,       TR, mView },
