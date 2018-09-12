@@ -543,10 +543,11 @@ void Analyse_HSV_of_Image(const String &imageName, const String &winName)
 	}
 }
 }
-
+/*
 int main(int argc, char** argv )
 {
 	Panelize::Detect_Walls(argv[1]);
 	//Analyse_HSV_of_Image(argv[1], "Trackwin");
 	return 0;
 }
+*/
