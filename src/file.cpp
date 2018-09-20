@@ -4,7 +4,7 @@
 // Copyright 2008-2013 Jonathan Westhues.
 //-----------------------------------------------------------------------------
 #include "solvespace.h"
-#include "panelize.h"
+// #include "panelize.h"
 
 #define VERSION_STRING "\261\262\263" "SolveSpaceREVa"
 
