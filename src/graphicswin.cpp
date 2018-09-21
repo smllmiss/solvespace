@@ -44,8 +44,8 @@ const GraphicsWindow::MenuEntry GraphicsWindow::menu[] = {
 { 1, N_("Save &As..."),                 Command::SAVE_AS,          0,       TN, mFile },
 { 1,  NULL,                             Command::NONE,             0,       TN, NULL  },
 { 1, N_("Export &Image..."),            Command::EXPORT_PNG,       0,       TN, mFile },
-{ 1, N_("Export 2d &View..."),          Command::EXPORT_VIEW,      0,       TN, mFile },
-{ 1, N_("Export 2d &Section..."),       Command::EXPORT_SECTION,   0,       TN, mFile },
+{ 1, N_("Export &.csv..."),          Command::EXPORT_VIEW,      0,       TN, mFile },
+{ 1, N_("Print &Options..."),       Command::EXPORT_SECTION,   0,       TN, mFile },
 /*
 { 1, NULL,     							Command::EXPORT_WIREFRAME, 0,       TN, mFile },
 { 1, NULL,    							Command::EXPORT_MESH,      0,       TN, mFile },
