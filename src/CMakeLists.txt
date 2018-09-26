@@ -170,6 +170,7 @@ set(solvespace_core_SOURCES
     mesh.cpp
     modify.cpp
     mouse.cpp
+    panelize.cpp
     polyline.cpp
     polygon.cpp
     resource.cpp
