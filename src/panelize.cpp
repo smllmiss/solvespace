@@ -11,7 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdint>
-#include <dirent.h>
+// #include <dirent.h> // where is this? error C1083
 #include <fstream>
 
 using namespace cv;
