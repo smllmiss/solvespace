@@ -13,6 +13,7 @@ build_script:
   - msbuild "test\solvespace-testsuite.vcxproj" /verbosity:minimal /property:Configuration=%BUILD_TYPE% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 install:
   - cinst opencv
+  - cmd: SET PATH=%APPVEYOR_BUILD_FOLDER%\tools;%PATH%
 test_script:
   - bin\%BUILD_TYPE%\solvespace-testsuite.exe
 artifacts:
