@@ -1,5 +1,6 @@
 version: 3.0.{build}
 clone_depth: 1
+os: unstable
 install:
   - cinst opencv
 before_build:
