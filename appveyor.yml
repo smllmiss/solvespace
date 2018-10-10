@@ -4,6 +4,7 @@ before_build:
   - git submodule update --init
   - mkdir build
   - cd build
+  - Xcopy /E /I C:\OpenCV C:/projects/solvespace/build/ /E /I
   - set tag=x%APPVEYOR_REPO_TAG_NAME%
   - if %tag:~,2% == xv (set BUILD_TYPE=RelWithDebInfo) else (set BUILD_TYPE=Debug)
   - cmake -G"Visual Studio 12" -T v120 ..
@@ -13,7 +14,6 @@ build_script:
   - msbuild "test\solvespace-testsuite.vcxproj" /verbosity:minimal /property:Configuration=%BUILD_TYPE% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 install:
   - cinst opencv
-  - cmd: SET PATH=%APPVEYOR_BUILD_FOLDER%\tools;%PATH%
 test_script:
   - bin\%BUILD_TYPE%\solvespace-testsuite.exe
 artifacts:
