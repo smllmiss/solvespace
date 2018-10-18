@@ -5,6 +5,7 @@
 //
 // Copyright 2008-2013 Jonathan Westhues.
 //-----------------------------------------------------------------------------
+#include <process.h>
 #include <time.h>
 
 #include "config.h"
