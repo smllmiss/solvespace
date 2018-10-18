@@ -4,7 +4,7 @@ before_build:
   - git submodule update --init
   - mkdir build
   - cd build
-  - Xcopy /E /I C:\OpenCV C:/projects/solvespace/build/ /E /I
+//  - Xcopy /E /I C:\OpenCV C:/projects/solvespace/build/ /E /I
   - set tag=x%APPVEYOR_REPO_TAG_NAME%
   - if %tag:~,2% == xv (set BUILD_TYPE=RelWithDebInfo) else (set BUILD_TYPE=Debug)
   - cmake -G"Visual Studio 12" -T v120 ..
