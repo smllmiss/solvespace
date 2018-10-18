@@ -9,6 +9,7 @@
 
 #include "config.h"
 #include "../solvespace.h"
+#include "../PyPanelize.h"
 
 // Include after solvespace.h to avoid identifier clashes.
 #include <windows.h>
@@ -1586,6 +1587,8 @@ static bool ProcessSpaceNavigatorMsg(MSG *msg) {
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     LPSTR lpCmdLine, INT nCmdShow)
 {
+    system("python test.py\n");	
+
     Instance = hInstance;
 
     InitCommonControls();
