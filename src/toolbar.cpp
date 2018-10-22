@@ -25,7 +25,7 @@ static ToolIcon Toolbar[] = {
 	{ "image",           Command::IMAGE,
       N_("Sketch image from a file"),                         {} },
 	{ "length",          Command::DISTANCE_DIA,
-      N_("Constrain distance / diameter / length"),           {} },
+      N_("Scale"),           				      {} },
 	{ "",                Command::NONE, "",               {} },
 	
 	{ "line",            Command::LINE_SEGMENT,
