@@ -3,18 +3,21 @@
 //-------------------------------------------------------//
 // Author: Akash Kothari  <akothar3@ncsu.edu>
 //-------------------------------------------------------//
+
 #ifndef PANELIZE__H__
 #define PANELIZE__H__
+
 #include <iostream>
 #include <vector>
 #include <cstdint>
-//#include <dirent.h>
 #include <fstream>
 #include <string>
+#include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
 #include <map>
 #include <sstream>
+#include <math.h>
 
 namespace Panelization {
 // Generic class to represent colors. But it is abstract i.e. you are not
@@ -159,10 +162,8 @@ private:
 // We map the head of the panels to the pointer to the panel list.
 	std::map<const Panel *, std::vector<Panel *> *> panelHeadListMap;
 
-// Cordinates of the wall in the print
+// Sides of the wall in the print
 	std::vector<double> rectSides;
-
-	friend class Processor;
 
 // Constructors need to be private to restrict how this class is used
 	Wall() = default;
@@ -180,6 +181,8 @@ private:
 	Wall(const Wall &) = delete;
 
 	Wall operator = (const Wall &) = delete;
+	
+	friend class Processor;
 
 public:
 // Get wall info
@@ -217,6 +220,11 @@ private:
 		rectSides.clear();
 		rectSides.push_back(side1);
 		rectSides.push_back(side2);
+	}
+	
+	void setRectSide(double side) {
+		rectSides.clear();
+		rectSides.push_back(side);
 	}
 	
 	std::vector<double> &getRectSides() {
@@ -291,7 +299,7 @@ private:
 // Verify wall info is correct
 	bool wallInfoIsSane() {
 		//return true;
-		if(rectSides.size() != 2)
+		if(!(rectSides.size() && rectSides.size() <= 2))
 			return false;
 		if(!length)
 			return false;
@@ -303,7 +311,7 @@ private:
 	// Verify wall info is sane
 		if(!wallInfoIsSane()) {
 			std::cout << "Wall info is not sane\n";
-			exit(-1);
+			//exit(-1);
 		}
 
 		std::cout << "************ WALL INFO ******************\n";
@@ -338,7 +346,7 @@ private:
 class Processor {
 private:
 // Wall list
-	static std::vector<Wall *> wallList;
+	std::vector<Wall *> wallList;
 
 	struct PanelInfo {
 	private:
@@ -355,18 +363,27 @@ private:
 	};
 
 // List of panels
-	static std::vector<PanelInfo> panelList;
+	std::vector<PanelInfo> panelList;
 
 public:
-	Processor() = default;
-	
 	Processor(const std::string &imageName,
 			  const std::string &panelListFileName, double scale, 
-			  double noiseThreshold = 5,
+			  bool cornerSelection = false, double noiseThreshold = 5,
 			  const std::string &outputFileName = std::string()) {
+		std::cout << "PROCESSOR\n";
+	// Invoke the python script to get the wall data in a file
+		std::string outputFile = imageName + ".csv";
+		runProcessorScript(imageName, outputFile, cornerSelection);
+		
+	// Now that the file has been written to, develop a tree of wall and panels info
+		readOutputFile(outputFile, cornerSelection);
+		
+	// Get the list of available panels
+		getPanels(panelListFileName);
+		
 	// Filter out the noise
 		std::cout << "FILTERING NOISE\n";
-		filterNoise(scale, noiseThreshold);
+		filterNoise(scale, noiseThreshold, cornerSelection);
 
 	// Compute panels needed for given wall layout
 		printAvailablePanels();
@@ -411,7 +428,121 @@ public:
 	}
 
 private:
-// API to add panels to available panel list
+	void runProcessorScript(const std::string &imageName, 
+							const std::string &outputFileName,
+ 							bool cornerSelection) const {	
+	// Run a python script too get all the wall data into a csv file
+		char command[1024] = {0};
+		if(!cornerSelection) {
+			sprintf(command, "python imageProcTest.py --image %s --output %s\n", 
+								 imageName.c_str(), outputFileName.c_str());
+		} else {
+			sprintf(command, "python imageProcTest.py --image %s --output %s --corner True\n", 
+								 imageName.c_str(), outputFileName.c_str());
+		}
+		std::cout << "COMMAND: " << command << "\n";
+		system(command);
+	}
+	
+	void readOutputFile(const std::string &outputFileName, bool cornerSelection) {
+		std::cout << "OUTPUT FILE NAME: " << outputFileName << "\n";
+	// Open the output file and read it
+		std::ifstream outfile(outputFileName);
+		std::string line;
+		while(std::getline(outfile, line)) {
+			std::cout << "LINE: " << line << "\n";
+			size_t index = 2;
+			
+		// Allocate a wall
+			uint8_t hue = (uint8_t)getNumber(',', index, line);
+			index += 2;
+			uint8_t sat = (uint8_t)getNumber(',', index, line);
+			index += 2;
+			uint8_t val = (uint8_t)getNumber(')', index, line);
+			printf("HUE: %d\n", hue);
+			printf("SAT: %d\n", sat);
+			printf("VAL: %d\n", val);
+			//std::cout << "HUE: " << hue << "\n";
+			//std::cout << "SAT: " << sat << "\n";
+			//std::cout << "VAL: " << val << "\n";
+			Wall *wall = allocateWall(hue, sat, val);
+			
+		// Get its vertices
+			index += 5;
+			double x1 = getNumber(',', index, line);
+			index += 2;
+			double y1 = getNumber(')', index, line);
+			printf("x1: %lf\n", x1);
+			printf("y1: %lf\n", y1);
+			index += 5;
+			double x2 = getNumber(',', index, line);
+			index += 2;
+			double y2 = getNumber(')', index, line);
+			printf("x2: %lf\n", x2);
+			printf("y2: %lf\n", y2);
+			if(!cornerSelection) {
+			// If the corners are not selected, then there must be 2 more vertices left	
+				index += 5;
+				double x3 = getNumber(',', index, line);
+				index += 2;
+				double y3 = getNumber(')', index, line);
+				printf("x3: %lf\n", x3);
+				printf("y3: %lf\n", y3);
+				index += 5;
+				double x4 = getNumber(',', index, line);
+				index += 2;
+				double y4 = getNumber(')', index, line);
+				printf("x4: %lf\n", x4);
+				printf("y4: %lf\n", y4);
+				
+			// Find the sides of the walls. 2 must be sides and 1 must be the diagonal
+				double length1 = euclideanDistance(x1, y1, x2, y2);
+				std::cout << "LENGTH1: " << length1 << "\n";
+				double length2 = euclideanDistance(x1, y1, x3, y3);
+				std::cout << "LENGTH2: " << length2 << "\n";
+				double length3 = euclideanDistance(x1, y1, x4, y4);
+				std::cout << "LENGTH3: " << length3 << "\n";
+				if(length1 > length2 && length1 > length3) {
+				// Length1 is a diagonal
+					wall->setRectSides(length2, length3);
+				} else {
+					if(length2 > length1 && length2 > length3) {
+					// Length2 is a diagonal
+						wall->setRectSides(length1, length3);
+					} else {
+					// Length3 is a diagonal
+						wall->setRectSides(length1, length2);
+					}
+				}
+			} else {
+			// Set the length of the allocated wall
+				double length = euclideanDistance(x1, y1, x2, y2);
+				wall->setRectSide(length);
+			}
+			
+			wallList.push_back(wall);
+		}
+	}
+	
+	double getNumber(char stopChar, size_t &index, const std::string line) const {
+		std::cout << "INDEX: " << index << "\n";
+		std::cout << "START LINE CHAR: " << line[index] << "\n";
+		char number[1024] = {0};
+		int i= 0;
+		while(line[index] != stopChar) {
+			std::cout << line[index] << " ";
+			number[i++] = line[index++];
+		}
+		std::cout << "\n";
+		return atof(number);
+	}
+	
+	double euclideanDistance(double x1, double y1, double x2, double y2) const {
+		double sq_diff_x = (x1 - x2) * (x1 - x2);
+		double sq_diff_y = (y1 - y2) * (y1 - y2);
+		return sqrt(sq_diff_x + sq_diff_y);
+	}
+	
 	void addPanel(double width, double height = 0) {
 		PanelInfo panel(width, height);
 		panelList.push_back(panel);
@@ -535,7 +666,7 @@ private:
 		return numCommas;
 	}
 
-	static Wall *allocateWall(uint8_t hue, uint8_t saturation, 
+	Wall *allocateWall(uint8_t hue, uint8_t saturation, 
 										   uint8_t brightness) {
 		Wall *wall = new Wall(hue, saturation, brightness);
 		if(!wall) {
@@ -545,7 +676,7 @@ private:
 		return wall;
 	}
 
-	static Wall *allocateWall(double length = 0, double width = 0,
+	Wall *allocateWall(double length = 0, double width = 0,
 												double height = 0) {
 		Wall *wall = new Wall(length, width, height);
 		if(!wall) {
@@ -555,7 +686,7 @@ private:
 		return wall;
 	}
 
-	static Panel *allocatePanel(double width = 0, double height = 0) {
+	Panel *allocatePanel(double width = 0, double height = 0) {
 		Panel *panel = new Panel(width, height);
 		if(!panel) {
 			std::cout << "Error in allocating panel.\n";
@@ -812,7 +943,7 @@ private:
 		}
 	}
 
-	void filterNoise(double scale, double noiseThreshold) {
+	void filterNoise(double scale, double noiseThreshold, bool cornerSelection) {
 	// Filter noise. Avoid anything that does not have a proper, significant size
 	// Traverse the object list and filter the bugger noise out. For rectangles,
 	// there are only three unique distances. We pick two shortest lengths,
@@ -820,41 +951,50 @@ private:
 		std::vector<Wall *> tempList = wallList;
 		wallList.clear();
 		std::vector<Wall *>::iterator wall_it = tempList.begin();
-		while(wall_it != tempList.end()) {
-		// Walls are treated as rectangles. Get two rectangle sides	and check if the
-		// ratio of sides is more than the threshold. If it is, put the wall in the
-		// wall list and save the scaled lengths of the walls.
-			double side1 = (*wall_it)->getRectSides()[0];
-			double side2 = (*wall_it)->getRectSides()[1];
-			if(side1 && side2) {
-				if(side1 > side2) {
-					if(side1 / side2 >= noiseThreshold) {
-						if(side2 <= 1000 && side2 >= 5) {
-							wallList.push_back(*wall_it);
-							(*wall_it)->setLength(side1 * scale);
+		if(!cornerSelection) {
+			while(wall_it != tempList.end()) {
+			// Walls are treated as rectangles. Get two rectangle sides	and check if the
+			// ratio of sides is more than the threshold. If it is, put the wall in the
+			// wall list and save the scaled lengths of the walls.
+				double side1 = (*wall_it)->getRectSides()[0];
+				double side2 = (*wall_it)->getRectSides()[1];
+				if(side1 && side2) {
+					if(side1 > side2) {
+						if(side1 / side2 >= noiseThreshold) {
+							if(side2 <= 1000 && side2 >= 5) {
+								wallList.push_back(*wall_it);
+								(*wall_it)->setLength(side1 * scale);
+							}
+							std::cout << " WALL SIDE WIDTH: " << side1 << "\n";
+						} else {
+						// Delete the wall
+							delete *wall_it;
 						}
-						std::cout << " WALL SIDE WIDTH: " << side1 << "\n";
 					} else {
-					// Delete the wall
-						delete *wall_it;
+						if(side2 / side1 >= noiseThreshold) {
+							//if(side1 <= 1000 && side1 >= 5) {
+								wallList.push_back(*wall_it);
+								(*wall_it)->setLength(side2 * scale);
+							//}
+							std::cout << " WALL SIDE WIDTH: " << side1 << "\n";
+						} else {
+						// Delete the wall	
+							delete *wall_it;
+						}
 					}
 				} else {
-					if(side2 / side1 >= noiseThreshold) {
-						//if(side1 <= 1000 && side1 >= 5) {
-							wallList.push_back(*wall_it);
-							(*wall_it)->setLength(side2 * scale);
-						//}
-						std::cout << " WALL SIDE WIDTH: " << side1 << "\n";
-					} else {
-					// Delete the wall	
-						delete *wall_it;
-					}
+				// Delete the wall	
+					delete *wall_it;
 				}
-			} else {
-			// Delete the wall	
-				delete *wall_it;
+				wall_it++;
 			}
-			wall_it++;
+		} else {
+		// User selected walls. Assume everything is sane.	
+			while(wall_it != tempList.end()) {
+				double side = (*wall_it)->getRectSides()[0];
+				(*wall_it)->setLength(side * scale);
+				wall_it++;
+			}
 		}
 	}
 	
@@ -983,15 +1123,12 @@ private:
 			(*wall)->mergePanelsInPanelLists();
 			wall++;
 		}
-	}
+	}	
 
 // This class is not abstract
 	void abstractImage() const {}
 };
 
-std::vector<Wall *> Processor::wallList = std::vector<Wall *>();
-std::vector<Processor::PanelInfo> Processor::panelList = 
-							std::vector<Processor::PanelInfo>();
 } // namespace Panelization
 
-#endif
+#endif  // PANELIZE__H__
