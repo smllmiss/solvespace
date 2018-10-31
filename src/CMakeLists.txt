@@ -135,6 +135,7 @@ set(every_platform_SOURCES
 # solvespace library
 
 set(solvespace_core_HEADERS
+    dialog.h
     dsc.h
     expr.h
     polygon.h
