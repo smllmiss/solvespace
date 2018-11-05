@@ -5,6 +5,7 @@
 // Copyright 2008-2013 Jonathan Westhues.
 //-----------------------------------------------------------------------------
 #include "solvespace.h"
+#include <Python.h>
 
 std::string Constraint::DescriptionString() const {
     std::string s;
@@ -126,8 +127,8 @@ void Constraint::MenuConstrain(Command id) {
 
     switch(id) {
         case Command::DISTANCE_DIA: {
-            SplashBox("\n	   		    Wall Panel Layout, Assembly and Inventory Management\n\n\n\n\nElizabeth Anderson, Taylor Ascher, Akash Kothari, Guthrie Shriver\n	   		Sponsored by Doggett Concrete™\n\n\n\n				Solvespace (http://solvespace.com) is an open-source software\n	  		    Jonathon Westhues and other authors © 2008-2016 .", 15, 67);
-            }
+            
+        }
         case Command::REF_DISTANCE: {
             if(gs.points == 2 && gs.n == 2) {
                 c.type = Type::PT_PT_DISTANCE;
