@@ -5,7 +5,7 @@
 // Copyright 2008-2013 Jonathan Westhues.
 //-----------------------------------------------------------------------------
 #include "solvespace.h"
-#include "c:\python27\include\Python.h"
+// #include "c:\python27\include\Python.h"
 // LINK : fatal error LNK1104: cannot open file 'python27_d.lib'
 std::string Constraint::DescriptionString() const {
     std::string s;
