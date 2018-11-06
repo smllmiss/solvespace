@@ -5,7 +5,7 @@
 // Copyright 2008-2013 Jonathan Westhues.
 //-----------------------------------------------------------------------------
 #include "solvespace.h"
-#include "c:\python27\Python.h"
+#include "c:\python27\include\Python.h"
 
 std::string Constraint::DescriptionString() const {
     std::string s;
